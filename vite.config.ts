@@ -7,6 +7,8 @@ import laravel from 'laravel-vite-plugin';
 import { bunny } from 'laravel-vite-plugin/fonts';
 import { defineConfig, lazyPlugins } from 'vite-plus';
 
+const isBuild = process.argv.includes('build');
+
 export default defineConfig({
     plugins: lazyPlugins(() => [
         laravel({
@@ -24,10 +26,10 @@ export default defineConfig({
             presets: [reactCompilerPreset()],
         }),
         tailwindcss(),
-        wayfinder({
+        !isBuild && wayfinder({
             formVariants: true,
         }),
-    ]),
+    ].filter(Boolean)),
     server: {
         watch: {
             ignored: [
