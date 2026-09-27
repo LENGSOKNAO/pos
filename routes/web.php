@@ -9,6 +9,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'welcome')->name('home');
 
+// Key-less, DB-less diagnostic for serverless deploys (no session/cookies).
+Route::get('/health', fn () => response()->json(['status' => 'ok']))->name('health');
+
 Route::middleware('guest')->group(function (): void {
     Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
     Route::post('/login', [AuthenticatedSessionController::class, 'store'])->name('login.store');
