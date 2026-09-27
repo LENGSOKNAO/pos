@@ -20,6 +20,7 @@ use Illuminate\Routing\Middleware\ThrottleRequests;
 if (($_SERVER['VERCEL'] ?? getenv('VERCEL')) === '1') {
     foreach ([
         'APP_ENV' => 'production',
+        'APP_MAINTENANCE_DRIVER' => 'file',
         'LOG_CHANNEL' => 'stderr',
         'SESSION_DRIVER' => 'cookie',
         'CACHE_STORE' => 'array',
@@ -33,7 +34,12 @@ if (($_SERVER['VERCEL'] ?? getenv('VERCEL')) === '1') {
         'DB_CONNECTION' => 'pgsql',
         'DB_SSLMODE' => 'require',
     ] as $key => $fallback) {
-        if (! isset($_SERVER[$key]) && getenv($key) === false) {
+        // NB: empty-string env values are treated as missing. The platform
+        // may inject declared-but-unset variables as '', and Laravel's
+        // env() helper returns '' verbatim instead of the default, which
+        // breaks every driver name resolved from the environment.
+        $current = $_SERVER[$key] ?? getenv($key);
+        if ($current === false || $current === '') {
             $_ENV[$key] = $_SERVER[$key] = $fallback;
             putenv("{$key}={$fallback}");
         }
