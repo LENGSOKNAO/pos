@@ -1,13 +1,34 @@
 {
-  "buildCommand": "npm run build",
-  "outputDirectory": "public/build",
-  "framework": "vite",
-  "installCommand": "npm install",
-  "devCommand": "npm run dev",
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
+    "version": 2,
+    "framework": null,
+    "builds": [
+        { "src": "api/index.php", "use": "vercel-php@0.9.0" },
+        { "src": "public/**", "use": "@vercel/static" }
+    ],
+    "routes": [
+        { "src": "/build/(.*)", "dest": "/public/build/$1" },
+        { "src": "/favicon.ico", "dest": "/public/favicon.ico" },
+        { "src": "/favicon.svg", "dest": "/public/favicon.svg" },
+        { "src": "/apple-touch-icon.png", "dest": "/public/apple-touch-icon.png" },
+        { "src": "/(.*)", "dest": "/api/index.php" }
+    ],
+    "env": {
+        "APP_NAME": "SquarePOS",
+        "APP_ENV": "production",
+        "APP_DEBUG": "false",
+        "APP_URL": "https://pos.vercel.app",
+        "APP_CONFIG_CACHE": "/tmp/config.php",
+        "APP_EVENTS_CACHE": "/tmp/events.php",
+        "APP_PACKAGES_CACHE": "/tmp/packages.php",
+        "APP_ROUTES_CACHE": "/tmp/routes.php",
+        "APP_SERVICES_CACHE": "/tmp/services.php",
+        "VIEW_COMPILED_PATH": "/tmp",
+        "CACHE_STORE": "array",
+        "QUEUE_CONNECTION": "sync",
+        "SESSION_DRIVER": "cookie",
+        "SESSION_SECURE_COOKIE": "true",
+        "LOG_CHANNEL": "stderr",
+        "DB_CONNECTION": "pgsql",
+        "DB_SSLMODE": "require"
     }
-  ]
 }
