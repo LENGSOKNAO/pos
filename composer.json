@@ -42,6 +42,7 @@
     },
     "scripts": {
         "vercel": [
+            "npm install --no-audit --no-fund",
             "npm run build"
         ],
         "setup": [
