@@ -36,6 +36,17 @@ class AppServiceProvider extends ServiceProvider
     {
         RateLimiter::for('api', fn (Request $request) => Limit::perMinute(120)->by($request->user()?->id ?: $request->ip()));
 
+        // Serverless (Vercel): read-only filesystem except /tmp. Enforce
+        // here (not only via env) because runtime env injection is unreliable.
+        // No-op locally where storage/logs is writable.
+        if (($_SERVER['VERCEL'] ?? getenv('VERCEL')) === '1' || ! is_writable(storage_path('logs'))) {
+            config()->set('logging.default', 'stderr');
+            config()->set('session.driver', 'cookie');
+            config()->set('cache.default', 'array');
+            config()->set('queue.default', 'sync');
+            config()->set('view.compiled', '/tmp');
+        }
+
         Date::use(CarbonImmutable::class);
 
         DB::prohibitDestructiveCommands(
