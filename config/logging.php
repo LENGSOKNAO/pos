@@ -60,14 +60,14 @@ return [
 
         'single' => [
             'driver' => 'single',
-            'path' => storage_path('logs/laravel.log'),
+            'path' => is_writable(storage_path('logs')) ? storage_path('logs/laravel.log') : 'php://stderr',
             'level' => env('LOG_LEVEL', 'debug'),
             'replace_placeholders' => true,
         ],
 
         'daily' => [
             'driver' => 'daily',
-            'path' => storage_path('logs/laravel.log'),
+            'path' => is_writable(storage_path('logs')) ? storage_path('logs/laravel.log') : 'php://stderr',
             'level' => env('LOG_LEVEL', 'debug'),
             'max_files' => env('LOG_DAILY_DAYS', 14),
             'replace_placeholders' => true,
@@ -75,7 +75,7 @@ return [
 
         'monthly' => [
             'driver' => 'monthly',
-            'path' => storage_path('logs/laravel.log'),
+            'path' => is_writable(storage_path('logs')) ? storage_path('logs/laravel.log') : 'php://stderr',
             'level' => env('LOG_LEVEL', 'debug'),
             'max_files' => 3,
             'replace_placeholders' => true,
@@ -132,7 +132,7 @@ return [
         ],
 
         'emergency' => [
-            'path' => storage_path('logs/laravel.log'),
+            'path' => is_writable(storage_path('logs')) ? storage_path('logs/laravel.log') : 'php://stderr',
         ],
 
     ],
