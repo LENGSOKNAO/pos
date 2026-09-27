@@ -13,9 +13,11 @@ interface Ret { id: number; return_no: string; sale?: string | null; status: str
 
 const labelCls = 'text-[11px] font-semibold tracking-wider text-slate-500 uppercase';
 
-export default function ReturnsIndex({ returns, sales }: { returns: { data: Ret[] }; sales: { id: number; invoice_no: string }[] }) {
+export default function ReturnsIndex({ returns, sales }: { returns?: { data: Ret[] }; sales?: { id: number; invoice_no: string }[] }) {
+    const safeReturns = returns ?? { data: [] as Ret[] };
+    const safeSales = Array.isArray(sales) ? sales : [];
     const [open, setOpen] = useState(false);
-    const [saleId, setSaleId] = useState<number>(sales[0]?.id ?? 0);
+    const [saleId, setSaleId] = useState<number>(safeSales[0]?.id ?? 0);
     const [warehouseId, setWarehouseId] = useState('');
     const [items, setItems] = useState<{ sale_item_id: string; quantity: string }[]>([{ sale_item_id: '', quantity: '1' }]);
 
@@ -32,7 +34,7 @@ export default function ReturnsIndex({ returns, sales }: { returns: { data: Ret[
             <Head title="Sales Returns" />
             <PageHeader
                 title="Sales Returns"
-                count={returns.data.length}
+                count={safeReturns.data.length}
                 description="Refunds and restocks linked to original sales."
                 actions={<Button onClick={() => setOpen(true)} className="h-10 rounded-xl bg-blue-600 font-semibold hover:bg-blue-700"><Plus className="size-4" /> New return</Button>}
             />
@@ -45,7 +47,7 @@ export default function ReturnsIndex({ returns, sales }: { returns: { data: Ret[
                     <th className={thCls}>Date</th>
                 </TableHeadRow>
                 <tbody>
-                    {returns.data.map((r) => (
+                    {safeReturns.data.map((r) => (
                         <tr key={r.id} className="border-t border-slate-200 hover:bg-slate-50">
                             <td className={`${tdCls} font-mono font-semibold`}>{r.return_no}</td>
                             <td className={`${tdCls} font-mono text-xs text-slate-500`}>{r.sale ?? '—'}</td>
@@ -58,7 +60,7 @@ export default function ReturnsIndex({ returns, sales }: { returns: { data: Ret[
                             <td className={`${tdCls} text-slate-500`}>{r.created_at}</td>
                         </tr>
                     ))}
-                    {returns.data.length === 0 && (
+                    {safeReturns.data.length === 0 && (
                         <tr><td colSpan={5} className="p-0"><EmptyState icon={<RotateCcw className="size-5" />} title="No returns found" hint="Returns restock the chosen warehouse automatically." /></td></tr>
                     )}
                 </tbody>
@@ -69,7 +71,7 @@ export default function ReturnsIndex({ returns, sales }: { returns: { data: Ret[
                     <div>
                         <Label className={labelCls}>Sale</Label>
                         <select value={saleId} onChange={(e) => setSaleId(Number(e.target.value))} className="mt-1 h-10 w-full rounded-xl border border-slate-200 bg-white px-2 text-sm">
-                            {sales.map((s) => <option key={s.id} value={s.id}>{s.invoice_no}</option>)}
+                            {safeSales.map((s) => <option key={s.id} value={s.id}>{s.invoice_no}</option>)}
                         </select>
                     </div>
                     <div>

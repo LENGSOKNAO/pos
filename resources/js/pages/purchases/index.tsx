@@ -29,13 +29,14 @@ function statusBadge(status: string) {
 }
 
 export default function PurchasesIndex({ orders, filters }: Props) {
-    const [search, setSearch] = useState(filters.search ?? '');
+    const safeOrders = orders ?? { data: [] as Order[], current_page: 1, last_page: 1, total: 0 };
+    const [search, setSearch] = useState(filters?.search ?? '');
     return (
         <AppLayout title="Purchases">
             <Head title="Purchases" />
             <PageHeader
                 title="Purchases"
-                count={orders.total}
+                count={safeOrders.total}
                 description="Purchase orders from suppliers."
                 actions={
                     <>
@@ -57,7 +58,7 @@ export default function PurchasesIndex({ orders, filters }: Props) {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {orders.data.map((o) => (
+                    {safeOrders.data.map((o) => (
                         <TableRow key={o.id}>
                             <TableCell className="font-mono font-semibold">{o.po_no}</TableCell>
                             <TableCell className="text-slate-500">{o.supplier ?? '—'}</TableCell>
@@ -66,7 +67,7 @@ export default function PurchasesIndex({ orders, filters }: Props) {
                             <TableCell className="text-slate-500">{o.order_date ?? o.created_at ?? '—'}</TableCell>
                         </TableRow>
                     ))}
-                    {orders.data.length === 0 && (
+                    {safeOrders.data.length === 0 && (
                         <TableRow>
                             <TableCell colSpan={5} className="p-0">
                                 <EmptyState icon={<ShoppingBag className="size-5" />} title="No purchase orders found" hint="Create your first purchase order." />
@@ -76,7 +77,7 @@ export default function PurchasesIndex({ orders, filters }: Props) {
                 </TableBody>
             </Table>
             {orders.last_page > 1 && (
-                <p className="mt-3 text-center text-xs text-slate-500 tabular-nums">Page {orders.current_page} of {orders.last_page} · {orders.total} records</p>
+                <p className="mt-3 text-center text-xs text-slate-500 tabular-nums">Page {orders.current_page} of {orders.last_page} · {safeOrders.total} records</p>
             )}
         </AppLayout>
     );

@@ -2,9 +2,24 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use App\Traits\HasUuids;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 
-class UserRole extends Model
+class UserRole extends Pivot
 {
-    protected $guarded = ['id'];
+    use HasUuids;
+
+    protected $table = 'user_roles';
+
+    protected $fillable = [
+        'id',
+        'user_id',
+        'role_id',
+    ];
+
+    protected $casts = [
+        'id' => 'string',
+        'user_id' => 'string',
+        'role_id' => 'string',
+    ];
 }

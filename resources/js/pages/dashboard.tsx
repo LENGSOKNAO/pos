@@ -179,7 +179,7 @@ export default function Dashboard({ stats }: { stats: Stats }) {
                 <Card className="rounded-2xl border-slate-200 shadow-sm">
                     <CardHeader className="flex flex-row items-center justify-between">
                         <CardTitle className="text-sm font-semibold">Needs restock</CardTitle>
-                        <Link href="/stocks" className="text-xs font-semibold text-blue-700 hover:underline">
+                        <Link href="/inventory/stock" className="text-xs font-semibold text-blue-700 hover:underline">
                             View all
                         </Link>
                     </CardHeader>

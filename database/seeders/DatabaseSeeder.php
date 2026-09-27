@@ -9,12 +9,12 @@ class DatabaseSeeder extends Seeder
 {
     use WithoutModelEvents;
 
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        $this->call(PosDemoSeeder::class);
-        $this->call(PosBulkSeeder::class);
+        $this->call([
+            PermissionSeeder::class,
+            CompanySeeder::class,
+            RoleSeeder::class,
+        ]);
     }
 }

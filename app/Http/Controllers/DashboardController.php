@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Invoice;
 use App\Models\Product;
-use App\Models\Sale;
 use App\Models\Stock;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -16,10 +16,10 @@ class DashboardController extends Controller
         $today = now()->toDateString();
         $yesterday = now()->subDay()->toDateString();
 
-        $todaySalesTotal = (float) Sale::whereDate('created_at', $today)->sum('grand_total');
-        $todayOrderCount = Sale::whereDate('created_at', $today)->count();
-        $yesterdaySalesTotal = (float) Sale::whereDate('created_at', $yesterday)->sum('grand_total');
-        $yesterdayOrderCount = Sale::whereDate('created_at', $yesterday)->count();
+        $todaySalesTotal = (float) Invoice::whereDate('invoice_date', $today)->where('status', 'paid')->sum('total');
+        $todayOrderCount = Invoice::whereDate('invoice_date', $today)->where('status', 'paid')->count();
+        $yesterdaySalesTotal = (float) Invoice::whereDate('invoice_date', $yesterday)->where('status', 'paid')->sum('total');
+        $yesterdayOrderCount = Invoice::whereDate('invoice_date', $yesterday)->where('status', 'paid')->count();
         $lowStockCount = Stock::where('quantity', '<=', 5)->count();
         $totalProducts = Product::count();
 
@@ -32,29 +32,30 @@ class DashboardController extends Controller
             $date = now()->subDays($i)->toDateString();
             $weekSeries[] = [
                 'day' => now()->subDays($i)->format('D'),
-                'total' => (float) Sale::whereDate('created_at', $date)->sum('grand_total'),
+                'total' => (float) Invoice::whereDate('invoice_date', $date)->where('status', 'paid')->sum('total'),
             ];
         }
 
-        $recentSales = Sale::query()
+        $recentSales = Invoice::query()
             ->with('customer:id,name')
+            ->where('status', 'paid')
             ->orderByDesc('id')
             ->limit(6)
-            ->get(['id', 'invoice_no', 'customer_id', 'grand_total', 'paid_amount', 'created_at'])
-            ->map(fn (Sale $sale): array => [
-                'id' => $sale->id,
-                'invoice_no' => $sale->invoice_no,
-                'customer' => $sale->customer?->name ?? 'Walk-in',
-                'total' => (float) $sale->grand_total,
-                'due' => max(0, (float) $sale->grand_total - (float) $sale->paid_amount),
-                'time' => $sale->created_at?->format('H:i'),
+            ->get(['id', 'invoice_number', 'customer_id', 'total', 'paid_amount', 'created_at'])
+            ->map(fn (Invoice $invoice): array => [
+                'id' => $invoice->id,
+                'invoice_no' => $invoice->invoice_number,
+                'customer' => $invoice->customer?->name ?? 'Walk-in',
+                'total' => (float) $invoice->total,
+                'due' => max(0, (float) $invoice->total - (float) $invoice->paid_amount),
+                'time' => $invoice->created_at?->format('H:i'),
             ]);
 
-        $topProducts = DB::table('sale_items')
-            ->join('products', 'products.id', '=', 'sale_items.product_id')
-            ->where('sale_items.created_at', '>=', now()->subDays(7))
+        $topProducts = DB::table('invoice_items')
+            ->join('products', 'products.id', '=', 'invoice_items.product_id')
+            ->where('invoice_items.created_at', '>=', now()->subDays(7))
             ->groupBy('products.id', 'products.name')
-            ->selectRaw('products.name as name, SUM(sale_items.quantity) as qty, SUM(sale_items.line_total) as revenue')
+            ->selectRaw('products.name as name, SUM(invoice_items.quantity) as qty, SUM(invoice_items.total) as revenue')
             ->orderByDesc('qty')
             ->limit(5)
             ->get()
@@ -65,14 +66,14 @@ class DashboardController extends Controller
             ]);
 
         $lowStockItems = Stock::query()
-            ->with(['productUnit.product:id,name', 'productUnit.unit:id,short_name', 'warehouse:id,name'])
+            ->with(['product:id,name,unit_id', 'product.unit:id,symbol', 'warehouse:id,name'])
             ->where('quantity', '<=', 5)
             ->orderBy('quantity')
             ->limit(6)
             ->get()
             ->map(fn (Stock $stock): array => [
-                'product' => $stock->productUnit?->product?->name ?? '—',
-                'unit' => $stock->productUnit?->unit?->short_name,
+                'product' => $stock->product?->name ?? '—',
+                'unit' => $stock->product?->unit?->symbol,
                 'warehouse' => $stock->warehouse?->name,
                 'quantity' => (float) $stock->quantity,
             ]);

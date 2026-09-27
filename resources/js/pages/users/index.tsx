@@ -22,7 +22,8 @@ interface UserRow {
 
 const fieldCls = 'mt-1 h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-normal outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100';
 
-export default function UsersIndex({ users, roles, branches }: { users: UserRow[]; roles: { id: number; name: string }[]; branches: { id: number; name: string }[] }) {
+export default function UsersIndex({ users, roles, branches }: { users?: UserRow[]; roles?: { id: number; name: string }[]; branches?: { id: number; name: string }[] }) {
+    const safeUsers = Array.isArray(users) ? users : [];
     const [open, setOpen] = useState(false);
     const { data, setData, post, processing, errors, reset } = useForm({ name: '', username: '', email: '', password: '', role_id: '', branch_id: '' });
 
@@ -36,17 +37,17 @@ export default function UsersIndex({ users, roles, branches }: { users: UserRow[
             <Head title="Users" />
             <PageHeader
                 title="Users"
-                count={users.length}
+                count={safeUsers.length}
                 description="Manage staff accounts, roles and branches."
                 actions={<Button onClick={() => setOpen(true)} className="h-10 rounded-xl bg-blue-600 font-semibold hover:bg-blue-700"><Plus className="size-4" /> New user</Button>}
             />
             <Card className="overflow-hidden rounded-2xl border-slate-200 p-0 shadow-sm">
-                <CardHeader className="border-b border-slate-200 px-5"><CardTitle className="text-sm font-semibold">All users ({users.length})</CardTitle></CardHeader>
+                <CardHeader className="border-b border-slate-200 px-5"><CardTitle className="text-sm font-semibold">All users ({safeUsers.length})</CardTitle></CardHeader>
                 <CardContent className="p-0">
                     <table className="w-full text-sm">
                         <thead className="bg-slate-50"><tr className="text-left text-[11px] font-semibold tracking-wider text-slate-500 uppercase"><th className="h-11 px-4">Name</th><th className="h-11 px-4">Username</th><th className="h-11 px-4">Roles</th><th className="h-11 px-4">Branches</th><th className="h-11 px-4">Status</th></tr></thead>
                         <tbody>
-                            {users.map((u) => (
+                            {safeUsers.map((u) => (
                                 <tr key={u.id} className="border-t border-slate-200 hover:bg-slate-50">
                                     <td className="h-11 px-4 font-semibold">{u.name}<div className="text-xs font-normal text-slate-500">{u.email}</div></td>
                                     <td className="h-11 px-4 font-mono text-xs text-slate-500">{u.username}</td>
@@ -59,7 +60,7 @@ export default function UsersIndex({ users, roles, branches }: { users: UserRow[
                                     </td>
                                 </tr>
                             ))}
-                            {users.length === 0 && (
+                            {safeUsers.length === 0 && (
                                 <tr><td colSpan={5} className="p-0"><EmptyState icon={<Users className="size-5" />} title="No users found" hint="Create the first staff account." /></td></tr>
                             )}
                         </tbody>

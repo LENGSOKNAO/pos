@@ -28,6 +28,7 @@ function qtyBadge(qty: number) {
 }
 
 export default function StocksIndex({ stocks, filters }: Props) {
+    const safeStocks = Array.isArray(stocks) ? stocks : [];
     const [search, setSearch] = useState(filters?.search ?? '');
     const submit = () => router.get(StockController.index.url(), { search }, { preserveState: true });
     return (
@@ -35,7 +36,7 @@ export default function StocksIndex({ stocks, filters }: Props) {
             <Head title="Stocks" />
             <PageHeader
                 title="Stock"
-                count={stocks.length}
+                count={safeStocks.length}
                 description="On-hand quantities by warehouse and unit."
                 actions={<SearchInput value={search} onChange={setSearch} onSubmit={submit} placeholder="Search stocks…" />}
             />
@@ -49,7 +50,7 @@ export default function StocksIndex({ stocks, filters }: Props) {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {stocks.map((s) => (
+                    {safeStocks.map((s) => (
                         <TableRow key={s.id}>
                             <TableCell className="text-slate-500">{s.warehouse ?? '—'}</TableCell>
                             <TableCell className="font-semibold text-slate-900">{s.product ?? '—'}</TableCell>
@@ -57,7 +58,7 @@ export default function StocksIndex({ stocks, filters }: Props) {
                             <TableCell className="text-right">{qtyBadge(s.quantity)}</TableCell>
                         </TableRow>
                     ))}
-                    {stocks.length === 0 && (
+                    {safeStocks.length === 0 && (
                         <TableRow>
                             <TableCell colSpan={4} className="p-0">
                                 <EmptyState icon={<Warehouse className="size-5" />} title="No stock found" hint="Try a different search term." />

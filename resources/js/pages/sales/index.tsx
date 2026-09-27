@@ -19,10 +19,11 @@ interface Sale {
     created_at?: string;
 }
 
-export default function SalesIndex({ sales, filters }: { sales: { data: Sale[]; current_page: number; last_page: number }; filters: { status?: string; from?: string; to?: string } }) {
-    const [status, setStatus] = useState(filters.status ?? '');
-    const [from, setFrom] = useState(filters.from ?? '');
-    const [to, setTo] = useState(filters.to ?? '');
+export default function SalesIndex({ sales, filters }: { sales?: { data: Sale[]; current_page: number; last_page: number }; filters?: { status?: string; from?: string; to?: string } }) {
+    const safeSales = sales ?? { data: [] as Sale[], current_page: 1, last_page: 1 };
+    const [status, setStatus] = useState(filters?.status ?? '');
+    const [from, setFrom] = useState(filters?.from ?? '');
+    const [to, setTo] = useState(filters?.to ?? '');
 
     function apply() {
         router.get('/sales', { status: status || undefined, from: from || undefined, to: to || undefined }, { preserveState: true });
@@ -31,7 +32,7 @@ export default function SalesIndex({ sales, filters }: { sales: { data: Sale[]; 
     return (
         <AppLayout title="Sales History">
             <Head title="Sales History" />
-            <PageHeader title="Sales History" count={sales.data.length} description="Completed and pending sales with payment status." />
+            <PageHeader title="Sales History" count={safeSales.data.length} description="Completed and pending sales with payment status." />
             <Card className="mb-4 flex flex-wrap items-end gap-2 rounded-2xl border-slate-200 p-4 shadow-sm">
                 <div>
                     <label className="mb-1 block text-[11px] font-semibold tracking-wider text-slate-500 uppercase">Status</label>
@@ -62,7 +63,7 @@ export default function SalesIndex({ sales, filters }: { sales: { data: Sale[]; 
                     <th className={thCls}>Date</th>
                 </TableHeadRow>
                 <tbody>
-                    {sales.data.map((s) => (
+                    {safeSales.data.map((s) => (
                         <tr key={s.id} className="border-t border-slate-200 hover:bg-slate-50">
                             <td className={tdCls}><Link href={`/sales/${s.id}`} className="font-mono font-semibold text-blue-700 hover:underline">{s.invoice_no}</Link></td>
                             <td className={`${tdCls} text-slate-500`}>{s.customer ?? '—'}</td>
@@ -76,7 +77,7 @@ export default function SalesIndex({ sales, filters }: { sales: { data: Sale[]; 
                             <td className={`${tdCls} text-slate-500`}>{s.created_at}</td>
                         </tr>
                     ))}
-                    {sales.data.length === 0 && (
+                    {safeSales.data.length === 0 && (
                         <tr><td colSpan={6} className="p-0"><EmptyState icon={<ReceiptText className="size-5" />} title="No sales found" hint="Adjust the filters or date range." /></td></tr>
                     )}
                 </tbody>

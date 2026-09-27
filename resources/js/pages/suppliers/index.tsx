@@ -10,8 +10,9 @@ import { EmptyState, PageHeader, SearchInput, TableHeadRow, TableShell, tdCls, t
 
 interface Supplier { id: number; name: string; code: string; phone?: string | null; balance: number; status: string }
 
-export default function SuppliersIndex({ suppliers, filters }: { suppliers: { data: Supplier[] }; filters: { search: string } }) {
-    const [search, setSearch] = useState(filters.search ?? '');
+export default function SuppliersIndex({ suppliers, filters }: { suppliers?: { data: Supplier[] }; filters?: { search: string } }) {
+    const safeSuppliers = suppliers ?? { data: [] as Supplier[] };
+    const [search, setSearch] = useState(filters?.search ?? '');
     const [open, setOpen] = useState(false);
     const [name, setName] = useState('');
     const [phone, setPhone] = useState('');
@@ -21,7 +22,7 @@ export default function SuppliersIndex({ suppliers, filters }: { suppliers: { da
             <Head title="Suppliers" />
             <PageHeader
                 title="Suppliers"
-                count={suppliers.data.length}
+                count={safeSuppliers.data.length}
                 description="Vendor accounts and outstanding balances."
                 actions={
                     <>
@@ -39,7 +40,7 @@ export default function SuppliersIndex({ suppliers, filters }: { suppliers: { da
                     <th className={thCls}>Status</th>
                 </TableHeadRow>
                 <tbody>
-                    {suppliers.data.map((s) => (
+                    {safeSuppliers.data.map((s) => (
                         <tr key={s.id} className="border-t border-slate-200 hover:bg-slate-50">
                             <td className={`${tdCls} font-semibold text-slate-900`}>{s.name}</td>
                             <td className={`${tdCls} font-mono text-xs text-slate-500`}>{s.code}</td>
@@ -52,7 +53,7 @@ export default function SuppliersIndex({ suppliers, filters }: { suppliers: { da
                             </td>
                         </tr>
                     ))}
-                    {suppliers.data.length === 0 && (
+                    {safeSuppliers.data.length === 0 && (
                         <tr><td colSpan={5} className="p-0"><EmptyState icon={<Truck className="size-5" />} title="No suppliers found" hint="Add your first supplier with Quick add." /></td></tr>
                     )}
                 </tbody>

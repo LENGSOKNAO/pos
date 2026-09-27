@@ -14,17 +14,17 @@ export function PageHeader({
     actions?: ReactNode;
 }) {
     return (
-        <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div className="mb-5 flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-5">
             <div className="min-w-0">
                 <div className="flex items-center gap-2">
-                    <h1 className="text-xl font-bold tracking-tight text-slate-900">{title}</h1>
+                    <h1 className="text-lg font-bold tracking-tight text-slate-900 sm:text-xl">{title}</h1>
                     {count !== undefined && (
-                        <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-bold text-blue-700 tabular-nums">
+                        <span className="rounded-full bg-blue-600 px-2.5 py-0.5 text-xs font-bold text-white tabular-nums">
                             {count}
                         </span>
                     )}
                 </div>
-                {description && <p className="mt-1 text-sm text-slate-500">{description}</p>}
+                {description && <p className="mt-0.5 text-sm text-slate-500">{description}</p>}
             </div>
             {actions && <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div>}
         </div>
@@ -66,8 +66,8 @@ export function SearchInput({
 export function EmptyState({ icon, title, hint }: { icon: ReactNode; title: string; hint?: string }) {
     return (
         <div className="flex flex-col items-center justify-center px-4 py-14 text-center">
-            <span className="flex size-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">{icon}</span>
-            <p className="mt-3 text-sm font-semibold text-slate-900">{title}</p>
+            <span className="flex size-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-50 to-slate-100 text-blue-400 ring-1 ring-slate-200">{icon}</span>
+            <p className="mt-3 text-sm font-bold text-slate-900">{title}</p>
             {hint && <p className="mt-1 max-w-xs text-sm text-slate-500">{hint}</p>}
         </div>
     );

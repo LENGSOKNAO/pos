@@ -32,14 +32,17 @@ const selectCls = 'mt-1 h-10 w-full rounded-xl border border-slate-200 bg-white 
 const labelCls = 'text-[11px] font-semibold tracking-wider text-slate-500 uppercase';
 
 export default function PurchaseCreate({ suppliers, warehouses, products }: Props) {
-    const [supplierId, setSupplierId] = useState<number>(suppliers[0]?.id ?? 0);
-    const [warehouseId, setWarehouseId] = useState<number>(warehouses[0]?.id ?? 0);
+    const safeSuppliers = Array.isArray(suppliers) ? suppliers : [];
+    const safeWarehouses = Array.isArray(warehouses) ? warehouses : [];
+    const safeProducts = Array.isArray(products) ? products : [];
+    const [supplierId, setSupplierId] = useState<number>(safeSuppliers[0]?.id ?? 0);
+    const [warehouseId, setWarehouseId] = useState<number>(safeWarehouses[0]?.id ?? 0);
     const [rows, setRows] = useState<Row[]>([{ product_unit_id: 0, quantity: '1', unit_cost: '0' }]);
     const [processing, setProcessing] = useState(false);
 
     const unitOptions = useMemo(() => {
         const opts: { id: number; label: string }[] = [];
-        products.forEach((p) =>
+        safeProducts.forEach((p) =>
             p.units.forEach((u) => opts.push({ id: u.id, label: `${p.name} (${p.sku}) #${u.id}` })),
         );
         return opts;
@@ -77,7 +80,7 @@ export default function PurchaseCreate({ suppliers, warehouses, products }: Prop
                     <div>
                         <label className={labelCls}>Supplier</label>
                         <select value={supplierId} onChange={(e) => setSupplierId(Number(e.target.value))} className={selectCls}>
-                            {suppliers.map((s) => (
+                            {safeSuppliers.map((s) => (
                                 <option key={s.id} value={s.id}>{s.name}</option>
                             ))}
                         </select>
@@ -85,7 +88,7 @@ export default function PurchaseCreate({ suppliers, warehouses, products }: Prop
                     <div>
                         <label className={labelCls}>Warehouse</label>
                         <select value={warehouseId} onChange={(e) => setWarehouseId(Number(e.target.value))} className={selectCls}>
-                            {warehouses.map((w) => (
+                            {safeWarehouses.map((w) => (
                                 <option key={w.id} value={w.id}>{w.name}</option>
                             ))}
                         </select>

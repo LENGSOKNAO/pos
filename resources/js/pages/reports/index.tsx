@@ -40,15 +40,20 @@ export default function ReportsIndex({
     topProducts,
     salesByDay,
 }: {
-    filters: { from: string; to: string; branch_id: number | null };
-    branches: { id: number; name: string }[];
-    summary: Summary;
-    topProducts: TopProduct[];
-    salesByDay: DayRow[];
+    filters?: { from: string; to: string; branch_id: number | null };
+    branches?: { id: number; name: string }[];
+    summary?: Summary;
+    topProducts?: TopProduct[];
+    salesByDay?: DayRow[];
 }) {
-    const [from, setFrom] = useState(filters.from);
-    const [to, setTo] = useState(filters.to);
-    const [branchId, setBranchId] = useState<string>(filters.branch_id ? String(filters.branch_id) : '');
+    const safeFilters = filters ?? { from: '', to: '', branch_id: null };
+    const safeBranches = Array.isArray(branches) ? branches : [];
+    const safeSummary: Summary = summary ?? { revenue: 0, orderCount: 0, avgTicket: 0, cogs: 0, grossProfit: 0, expensesTotal: 0, net: 0 };
+    const safeTopProducts = Array.isArray(topProducts) ? topProducts : [];
+    const safeSalesByDay = Array.isArray(salesByDay) ? salesByDay : [];
+    const [from, setFrom] = useState(safeFilters.from);
+    const [to, setTo] = useState(safeFilters.to);
+    const [branchId, setBranchId] = useState<string>(safeFilters.branch_id ? String(safeFilters.branch_id) : '');
 
     const apply = () => {
         router.get('/reports', { from, to, branch_id: branchId || undefined }, { preserveState: true });
@@ -56,14 +61,14 @@ export default function ReportsIndex({
 
     const money = (n: number) => `$${Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     const cards = [
-        { label: 'Revenue', value: money(summary.revenue), sub: `${summary.orderCount} orders` },
-        { label: 'Avg ticket', value: money(summary.avgTicket), sub: 'per order' },
-        { label: 'COGS (est.)', value: money(summary.cogs), sub: 'qty × purchase price' },
-        { label: 'Gross profit', value: money(summary.grossProfit), sub: 'revenue − COGS' },
-        { label: 'Expenses', value: money(summary.expensesTotal), sub: 'in range' },
-        { label: 'Net', value: money(summary.net), sub: 'gross − expenses' },
+        { label: 'Revenue', value: money(safeSummary.revenue), sub: `${safeSummary.orderCount} orders` },
+        { label: 'Avg ticket', value: money(safeSummary.avgTicket), sub: 'per order' },
+        { label: 'COGS (est.)', value: money(safeSummary.cogs), sub: 'qty × purchase price' },
+        { label: 'Gross profit', value: money(safeSummary.grossProfit), sub: 'revenue − COGS' },
+        { label: 'Expenses', value: money(safeSummary.expensesTotal), sub: 'in range' },
+        { label: 'Net', value: money(safeSummary.net), sub: 'gross − expenses' },
     ];
-    const maxDay = Math.max(1, ...salesByDay.map((d) => Number(d.total)));
+    const maxDay = Math.max(1, ...safeSalesByDay.map((d) => Number(d.total)));
 
     return (
         <AppLayout title="Reports">
@@ -80,12 +85,12 @@ export default function ReportsIndex({
                         To
                         <input type="date" value={to} onChange={(e) => setTo(e.target.value)} className={`mt-1 block ${inputCls}`} />
                     </label>
-                    {branches.length > 0 && (
+                    {safeBranches.length > 0 && (
                         <label className={labelCls}>
                             Branch
                             <select value={branchId} onChange={(e) => setBranchId(e.target.value)} className={`mt-1 block ${inputCls}`}>
                                 <option value="">All</option>
-                                {branches.map((b) => (
+                                {safeBranches.map((b) => (
                                     <option key={b.id} value={b.id}>{b.name}</option>
                                 ))}
                             </select>
@@ -111,8 +116,8 @@ export default function ReportsIndex({
                 <Card className="rounded-2xl border-slate-200 shadow-sm">
                     <CardHeader><CardTitle className="text-sm font-semibold">Sales by day</CardTitle></CardHeader>
                     <CardContent className="space-y-2">
-                        {salesByDay.length === 0 && <EmptyState icon={<PackageSearch className="size-5" />} title="No sales in range" hint="Pick a wider date range." />}
-                        {salesByDay.map((d) => (
+                        {safeSalesByDay.length === 0 && <EmptyState icon={<PackageSearch className="size-5" />} title="No sales in range" hint="Pick a wider date range." />}
+                        {safeSalesByDay.map((d) => (
                             <div key={d.day} className="flex items-center gap-2 text-xs">
                                 <span className="w-24 shrink-0 font-medium text-slate-500">{d.day}</span>
                                 <div className="h-5 flex-1 overflow-hidden rounded bg-slate-100">
@@ -129,14 +134,14 @@ export default function ReportsIndex({
                         <table className="w-full text-sm">
                             <thead><tr className="text-left text-[11px] font-semibold tracking-wider text-slate-500 uppercase"><th className="h-11">Product</th><th className="h-11 text-right">Qty</th><th className="h-11 text-right">Sales</th></tr></thead>
                             <tbody>
-                                {topProducts.map((p) => (
+                                {safeTopProducts.map((p) => (
                                     <tr key={p.sku} className="border-t border-slate-200">
                                         <td className="h-11 font-semibold">{p.name} <span className="font-mono text-xs font-normal text-slate-500">({p.sku})</span></td>
                                         <td className="h-11 text-right tabular-nums">{Number(p.total_qty).toLocaleString()}</td>
                                         <td className="h-11 text-right font-bold tabular-nums">${Number(p.total_sales).toLocaleString()}</td>
                                     </tr>
                                 ))}
-                                {topProducts.length === 0 && <tr><td colSpan={3} className="p-0"><EmptyState icon={<RotateCcw className="size-5" />} title="No data" hint="No product sales in range." /></td></tr>}
+                                {safeTopProducts.length === 0 && <tr><td colSpan={3} className="p-0"><EmptyState icon={<RotateCcw className="size-5" />} title="No data" hint="No product sales in range." /></td></tr>}
                             </tbody>
                         </table>
                     </CardContent>

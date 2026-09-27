@@ -29,8 +29,10 @@ interface Props {
 const labelCls = 'text-[11px] font-semibold tracking-wider text-slate-500 uppercase';
 
 export default function CashSessionsIndex({ sessions, registers }: Props) {
+    const safeSessions = sessions ?? { data: [] as Session[], total: 0 };
+    const safeRegisters = Array.isArray(registers) ? registers : [];
     const [openDlg, setOpenDlg] = useState(false);
-    const [registerId, setRegisterId] = useState(registers[0]?.id ?? 0);
+    const [registerId, setRegisterId] = useState(safeRegisters[0]?.id ?? 0);
     const [opening, setOpening] = useState('0');
     const [closeId, setCloseId] = useState<number | null>(null);
     const [closing, setClosing] = useState('0');
@@ -40,7 +42,7 @@ export default function CashSessionsIndex({ sessions, registers }: Props) {
             <Head title="Cash Sessions" />
             <PageHeader
                 title="Cash Sessions"
-                count={sessions.total}
+                count={safeSessions.total}
                 description="Open and close cash drawers per register."
                 actions={<Button className="h-10 rounded-xl bg-blue-600 font-semibold hover:bg-blue-700" onClick={() => setOpenDlg(true)}><Plus className="size-4" /> Open Session</Button>}
             />
@@ -57,7 +59,7 @@ export default function CashSessionsIndex({ sessions, registers }: Props) {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {sessions.data.map((s) => (
+                    {safeSessions.data.map((s) => (
                         <TableRow key={s.id}>
                             <TableCell className="font-mono text-xs">#{s.id}</TableCell>
                             <TableCell className="font-semibold">{s.register}</TableCell>
@@ -78,7 +80,7 @@ export default function CashSessionsIndex({ sessions, registers }: Props) {
                             </TableCell>
                         </TableRow>
                     ))}
-                    {sessions.data.length === 0 && (
+                    {safeSessions.data.length === 0 && (
                         <TableRow>
                             <TableCell colSpan={7} className="p-0">
                                 <EmptyState icon={<Wallet className="size-5" />} title="No sessions yet" hint="Open the first cash session for today." />
@@ -94,7 +96,7 @@ export default function CashSessionsIndex({ sessions, registers }: Props) {
                     <div>
                         <Label className={labelCls}>Register</Label>
                         <select value={registerId} onChange={(e) => setRegisterId(Number(e.target.value))} className="mt-1 h-10 w-full rounded-xl border border-slate-200 bg-white px-2 text-sm">
-                            {registers.map((r) => (
+                            {safeRegisters.map((r) => (
                                 <option key={r.id} value={r.id}>{r.name} ({r.code})</option>
                             ))}
                         </select>
