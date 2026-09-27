@@ -10,7 +10,22 @@ use Illuminate\Support\Facades\Route;
 Route::inertia('/', 'welcome')->name('home');
 
 // Key-less, DB-less diagnostic for serverless deploys (no session/cookies).
-Route::get('/health', fn () => response()->json(['status' => 'ok']))->name('health');
+// Reports only whether variables are present — never their values.
+Route::get('/health', function () {
+    $present = fn (string $key): bool => ($v = getenv($key)) !== false && $v !== '';
+
+    return response()->json([
+        'status' => 'ok',
+        'env' => [
+            'APP_KEY' => $present('APP_KEY'),
+            'APP_URL' => $present('APP_URL'),
+            'DB_HOST' => $present('DB_HOST'),
+            'DB_DATABASE' => $present('DB_DATABASE'),
+            'DB_USERNAME' => $present('DB_USERNAME'),
+            'DB_PASSWORD' => $present('DB_PASSWORD'),
+        ],
+    ]);
+})->name('health');
 
 Route::middleware('guest')->group(function (): void {
     Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
