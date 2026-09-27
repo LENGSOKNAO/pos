@@ -58,6 +58,24 @@ use App\Http\Controllers\Api\V1\Supplier\SupplierPaymentController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->name('api.')->group(function () {
+    // Stateless deploy diagnostic: reports only whether variables are
+    // present — never their values. No session, no cookies, no key needed.
+    Route::get('/health', function () {
+        $present = fn (string $key): bool => ($v = getenv($key)) !== false && $v !== '';
+
+        return response()->json([
+            'status' => 'ok',
+            'env' => [
+                'APP_KEY' => $present('APP_KEY'),
+                'APP_URL' => $present('APP_URL'),
+                'DB_HOST' => $present('DB_HOST'),
+                'DB_DATABASE' => $present('DB_DATABASE'),
+                'DB_USERNAME' => $present('DB_USERNAME'),
+                'DB_PASSWORD' => $present('DB_PASSWORD'),
+            ],
+        ]);
+    })->name('health');
+
     // Auth routes (outside auth:sanctum to avoid CSRF issues)
     Route::post('/auth/login', [AuthController::class, 'login']);
     Route::post('/auth/logout', [AuthController::class, 'logout']);
