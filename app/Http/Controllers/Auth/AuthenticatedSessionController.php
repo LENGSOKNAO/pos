@@ -35,7 +35,9 @@ class AuthenticatedSessionController extends Controller
             if (! $this->isConnectionFailure($e)) {
                 Log::error('login-attempt-failed '.get_class($e).': '.substr($e->getMessage(), 0, 200));
 
-                throw $e;
+                // TEMPORARY production diagnostic: surface the cause on the
+                // login form instead of a blank 500. Revert after diagnosis.
+                return $this->diagnosticBack($request, $e);
             }
 
             Log::warning('login-db-retry after connection failure');
@@ -46,12 +48,14 @@ class AuthenticatedSessionController extends Controller
             } catch (\Throwable $retry) {
                 Log::error('login-retry-failed '.get_class($retry).': '.substr($retry->getMessage(), 0, 200));
 
-                throw $retry;
+                // TEMPORARY production diagnostic, see above.
+                return $this->diagnosticBack($request, $retry);
             }
         } catch (\Throwable $e) {
             Log::error('login-attempt-failed '.get_class($e).': '.substr($e->getMessage(), 0, 200));
 
-            throw $e;
+            // TEMPORARY production diagnostic, see above.
+            return $this->diagnosticBack($request, $e);
         }
 
         if (! $attempted) {
@@ -93,5 +97,16 @@ class AuthenticatedSessionController extends Controller
 
         return str_contains(strtolower($e->getMessage()), 'could not connect')
             || str_contains(strtolower($e->getMessage()), 'server closed the connection');
+    }
+
+    /**
+     * TEMPORARY production diagnostic: flash the failure reason onto the
+     * login form instead of a blank 500. Remove once diagnosed.
+     */
+    private function diagnosticBack(Request $request, \Throwable $e): RedirectResponse
+    {
+        return back()->withErrors([
+            'username' => 'Login failed ['.(new \ReflectionClass($e))->getShortName().']: '.substr($e->getMessage(), 0, 220),
+        ])->onlyInput('username');
     }
 }
