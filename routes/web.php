@@ -5,11 +5,39 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\Product\ProductController;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'welcome')->name('home');
 
+// Deploy probe: proves which code is live and whether API routes + DB work.
+// Reports presence only — never secret values.
+Route::get('/healthz', function () {
+    $present = fn (string $key): bool => ($v = getenv($key)) !== false && $v !== '';
 
+    $db = 'not-tested';
+    try {
+        DB::select('select 1');
+        $db = 'ok';
+    } catch (Throwable $e) {
+        $db = (new ReflectionClass($e))->getShortName().': '.substr($e->getMessage(), 0, 160);
+    }
+
+    return response()->json([
+        'probe' => 'healthz-v1',
+        'routes_registered' => Route::getRoutes()->count(),
+        'api_health_registered' => Route::has('api.health'),
+        'login_store_registered' => Route::has('login.store'),
+        'db' => $db,
+        'env' => [
+            'APP_KEY' => $present('APP_KEY'),
+            'DB_HOST' => $present('DB_HOST'),
+            'DB_DATABASE' => $present('DB_DATABASE'),
+            'DB_USERNAME' => $present('DB_USERNAME'),
+            'DB_PASSWORD' => $present('DB_PASSWORD'),
+        ],
+    ]);
+})->name('healthz');
 
 Route::middleware('guest')->group(function (): void {
     Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
