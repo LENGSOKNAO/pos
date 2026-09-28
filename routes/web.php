@@ -29,6 +29,14 @@ Route::get('/healthz', function () {
         'api_health_registered' => Route::has('api.health'),
         'login_store_registered' => Route::has('login.store'),
         'db' => $db,
+        'bcrypt_rounds' => getenv('BCRYPT_ROUNDS'),
+        'bcrypt_make' => (function () {
+            try {
+                return is_string(@password_hash('probe', PASSWORD_BCRYPT, ['cost' => 4])) ? 'ok' : 'failed-false';
+            } catch (Throwable $e) {
+                return 'failed-'.get_class($e);
+            }
+        })(),
         'env' => [
             'APP_KEY' => $present('APP_KEY'),
             'DB_HOST' => $present('DB_HOST'),

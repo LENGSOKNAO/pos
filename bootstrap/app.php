@@ -33,6 +33,7 @@ if (($_SERVER['VERCEL'] ?? getenv('VERCEL')) === '1') {
         'APP_SERVICES_CACHE' => '/tmp/services.php',
         'DB_CONNECTION' => 'pgsql',
         'DB_SSLMODE' => 'require',
+        'BCRYPT_ROUNDS' => '12',
     ] as $key => $fallback) {
         // NB: empty-string env values are treated as missing. The platform
         // may inject declared-but-unset variables as '', and Laravel's
@@ -43,6 +44,15 @@ if (($_SERVER['VERCEL'] ?? getenv('VERCEL')) === '1') {
             $_ENV[$key] = $_SERVER[$key] = $fallback;
             putenv("{$key}={$fallback}");
         }
+    }
+
+    // BCRYPT_ROUNDS must be a valid cost (4-31). Anything else makes
+    // password_needs_rehash() always true and password_hash() throw,
+    // which breaks login via rehash-on-login. Normalize hard.
+    $rounds = $_SERVER['BCRYPT_ROUNDS'] ?? getenv('BCRYPT_ROUNDS');
+    if (! is_numeric($rounds) || (int) $rounds < 4 || (int) $rounds > 31) {
+        $_ENV['BCRYPT_ROUNDS'] = $_SERVER['BCRYPT_ROUNDS'] = '12';
+        putenv('BCRYPT_ROUNDS=12');
     }
 
     // Neon routing with old libpq (no SNI, as bundled in serverless PHP
