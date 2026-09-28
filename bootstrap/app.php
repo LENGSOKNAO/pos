@@ -44,6 +44,23 @@ if (($_SERVER['VERCEL'] ?? getenv('VERCEL')) === '1') {
             putenv("{$key}={$fallback}");
         }
     }
+
+    // Neon routing with old libpq (no SNI, as bundled in serverless PHP
+    // runtimes): the proxy rejects connections with "Endpoint ID is not
+    // specified". Workaround D from Neon's docs: pass the endpoint ID
+    // (first label of DB_HOST) inside the password field. Done here so the
+    // dashboard value stays a plain password. See
+    // https://neon.com/docs/connect/connection-errors
+    $dbPassword = $_SERVER['DB_PASSWORD'] ?? getenv('DB_PASSWORD');
+    $dbHost = $_SERVER['DB_HOST'] ?? getenv('DB_HOST');
+    if (is_string($dbPassword) && $dbPassword !== '' && ! str_starts_with($dbPassword, 'endpoint=')
+        && is_string($dbHost) && str_contains($dbHost, '.')
+    ) {
+        $endpointId = explode('.', $dbHost)[0];
+        $suffixed = "endpoint={$endpointId}\${$dbPassword}";
+        $_ENV['DB_PASSWORD'] = $_SERVER['DB_PASSWORD'] = $suffixed;
+        putenv("DB_PASSWORD={$suffixed}");
+    }
 }
 
 return Application::configure(basePath: dirname(__DIR__))
