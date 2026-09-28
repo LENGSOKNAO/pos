@@ -83,7 +83,7 @@ export default function Login() {
                         </form>
                     </CardContent>
                 </Card>
-                <p className="mt-4 text-center text-xs text-blue-200/80">Secure sign-in · Role-based access</p>
+                <p className="mt-4 text-center text-xs text-blue-200/80">Secure sign-in · Role-based access · build 20260928c</p>
             </div>
         </div>
     );
