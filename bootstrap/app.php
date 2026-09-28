@@ -85,8 +85,14 @@ return Application::configure(basePath: dirname(__DIR__))
         // Behind Vercel's edge (TLS terminated at the proxy).
         $middleware->trustProxies(at: '*');
 
-        $middleware->web(append: [
+        // Stateless auto-login: must run BEFORE Authenticate, and uses
+        // Auth::setUser (no session write) so serverless cookie issues
+        // can't cause a login <-> dashboard redirect loop.
+        $middleware->web(prepend: [
             AutoLoginAsOwner::class,
+        ]);
+
+        $middleware->web(append: [
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
         ]);

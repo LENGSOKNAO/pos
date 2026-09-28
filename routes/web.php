@@ -9,9 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/dashboard');
-Route::redirect('/login', '/dashboard');
-
-Route::inertia('/welcome', 'welcome')->name('home');
+Route::redirect('/login', '/dashboard')->name('login');
 
 // Deploy probe: proves which code is live and whether API routes + DB work.
 // Reports presence only — never secret values.
@@ -50,9 +48,7 @@ Route::get('/healthz', function () {
     ]);
 })->name('healthz');
 
-Route::middleware('guest')->group(function (): void {
-    Route::redirect('/login', '/dashboard')->name('login');
-});
+Route::post('/login', [AuthenticatedSessionController::class, 'store'])->name('login.store');
 
 Route::middleware('auth')->group(function (): void {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');

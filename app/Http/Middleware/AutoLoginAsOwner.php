@@ -13,11 +13,17 @@ class AutoLoginAsOwner
     public function handle(Request $request, Closure $next): Response
     {
         if (! Auth::check()) {
-            $owner = User::where('username', 'owner')->first()
-                ?? User::orderBy('id')->first();
+            try {
+                $owner = User::where('username', 'owner')->first()
+                    ?? User::orderBy('id')->first();
+            } catch (\Throwable) {
+                $owner = null;
+            }
 
             if ($owner) {
-                Auth::login($owner);
+                // Stateless: no session write, so it works even when
+                // the session store/cookies are broken on serverless.
+                Auth::setUser($owner);
             }
         }
 
