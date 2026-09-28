@@ -55,6 +55,7 @@ use App\Http\Controllers\Api\V1\Security\UserController;
 use App\Http\Controllers\Api\V1\Setting\SettingController;
 use App\Http\Controllers\Api\V1\Supplier\SupplierController;
 use App\Http\Controllers\Api\V1\Supplier\SupplierPaymentController;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->name('api.')->group(function () {
@@ -62,6 +63,14 @@ Route::prefix('v1')->name('api.')->group(function () {
     // present — never their values. No session, no cookies, no key needed.
     Route::get('/health', function () {
         $present = fn (string $key): bool => ($v = getenv($key)) !== false && $v !== '';
+
+        $db = 'not-tested';
+        try {
+            DB::select('select 1');
+            $db = 'ok';
+        } catch (Throwable $e) {
+            $db = class_basename($e).': '.substr($e->getMessage(), 0, 160);
+        }
 
         return response()->json([
             'status' => 'ok',
@@ -73,6 +82,7 @@ Route::prefix('v1')->name('api.')->group(function () {
                 'DB_USERNAME' => $present('DB_USERNAME'),
                 'DB_PASSWORD' => $present('DB_PASSWORD'),
             ],
+            'db' => $db,
         ]);
     })->name('health');
 
