@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\AuditLogMiddleware;
+use App\Http\Middleware\AutoLoginAsOwner;
 use App\Http\Middleware\CheckPermission;
 use App\Http\Middleware\CheckRole;
 use App\Http\Middleware\HandleInertiaRequests;
@@ -22,7 +23,7 @@ if (($_SERVER['VERCEL'] ?? getenv('VERCEL')) === '1') {
         'APP_ENV' => 'production',
         'APP_MAINTENANCE_DRIVER' => 'file',
         'LOG_CHANNEL' => 'stderr',
-        'SESSION_DRIVER' => 'cookie',
+        'SESSION_DRIVER' => 'database',
         'CACHE_STORE' => 'array',
         'QUEUE_CONNECTION' => 'sync',
         'VIEW_COMPILED_PATH' => '/tmp',
@@ -85,6 +86,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->trustProxies(at: '*');
 
         $middleware->web(append: [
+            AutoLoginAsOwner::class,
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
         ]);
