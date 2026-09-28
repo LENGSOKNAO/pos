@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -23,7 +24,15 @@ class AuthenticatedSessionController extends Controller
             'password' => ['required', 'string'],
         ]);
 
-        if (! Auth::attempt($credentials, $request->boolean('remember'))) {
+        try {
+            $attempted = Auth::attempt($credentials, $request->boolean('remember'));
+        } catch (\Throwable $e) {
+            Log::error('login-attempt-failed '.get_class($e).': '.substr($e->getMessage(), 0, 200));
+
+            throw $e;
+        }
+
+        if (! $attempted) {
             return back()->withErrors([
                 'username' => 'These credentials do not match our records.',
             ])->onlyInput('username');
