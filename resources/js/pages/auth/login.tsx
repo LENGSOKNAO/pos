@@ -23,7 +23,7 @@ export default function Login() {
     return (
         <div className="flex min-h-screen bg-white">
             <Head title="Login" />
-            <div className="hidden w-1/2 flex-col justify-between bg-slate-900 p-10 lg:flex">
+            <div className="hidden w-1/2 flex-col justify-between bg-[#0B1B3A] p-10 lg:flex">
                 <div className="flex items-center gap-2.5">
                     <span className="flex size-9 items-center justify-center rounded-lg bg-blue-600 text-base font-black text-white">S</span>
                     <span className="text-lg font-bold tracking-tight text-white">SquarePOS</span>

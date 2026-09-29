@@ -103,13 +103,13 @@ function Shell({
         "Back Office";
 
     const sidebar = (
-        <div className="flex h-full w-60 flex-col bg-white">
-            <Link href={dashboard.url()} className="flex items-center gap-2.5 border-b border-slate-100 px-5 py-4">
-                <span className="flex size-9 items-center justify-center rounded-lg bg-blue-600 text-base font-black text-white">
+        <div className="flex h-full w-60 flex-col bg-[#0B1B3A]">
+            <Link href={dashboard.url()} className="flex items-center gap-2.5 border-b border-white/10 px-5 py-4">
+                <span className="flex size-9 items-center justify-center rounded-lg bg-blue-500 text-base font-black text-white">
                     S
                 </span>
                 <span className="leading-tight">
-                    <span className="block text-[15px] font-bold tracking-tight text-slate-900">SquarePOS</span>
+                    <span className="block text-[15px] font-bold tracking-tight text-white">SquarePOS</span>
                     <span className="block text-[11px] font-medium text-slate-400">Back Office</span>
                 </span>
             </Link>
@@ -121,12 +121,13 @@ function Shell({
                             key={l.label}
                             href={l.href}
                             prefetch="hover"
+                            cacheFor="5m"
                             onClick={() => setMobileOpen(false)}
                             className={cn(
-                                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:outline-none",
+                                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:outline-none",
                                 active
-                                    ? "bg-blue-600 text-white shadow-sm"
-                                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900",
+                                    ? "bg-blue-600 text-white shadow-md shadow-blue-950/40"
+                                    : "text-slate-400 hover:bg-white/5 hover:text-white",
                             )}
                         >
                             <l.icon className="size-4.5 shrink-0" />
@@ -135,22 +136,22 @@ function Shell({
                     );
                 })}
             </nav>
-            <div className="border-t border-slate-100 p-3">
-                <div className="flex items-center gap-2.5 rounded-lg bg-slate-50 px-3 py-2.5">
-                    <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">
+            <div className="border-t border-white/10 p-3">
+                <div className="flex items-center gap-2.5 rounded-lg bg-white/5 px-3 py-2.5">
+                    <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-blue-500 text-xs font-bold text-white">
                         {userName.charAt(0).toUpperCase()}
                     </span>
                     <div className="min-w-0 flex-1 leading-tight">
-                        <p className="truncate text-sm font-semibold text-slate-900">{userName}</p>
-                        <Deferred data="authProfile" fallback={<p className="h-3 w-12 animate-pulse rounded bg-slate-200" />}>
-                            <p className="truncate text-xs text-slate-500">{roleName || "Staff"}</p>
+                        <p className="truncate text-sm font-semibold text-white">{userName}</p>
+                        <Deferred data="authProfile" fallback={<p className="h-3 w-12 animate-pulse rounded bg-white/10" />}>
+                            <p className="truncate text-xs text-slate-400">{roleName || "Staff"}</p>
                         </Deferred>
                     </div>
                     <button
                         onClick={() => router.post(logout.url())}
                         title="Logout"
                         aria-label="Logout"
-                        className="rounded-md p-1.5 text-slate-400 transition-colors hover:bg-slate-200 hover:text-slate-700"
+                        className="rounded-md p-1.5 text-slate-400 transition-colors hover:bg-white/10 hover:text-white"
                     >
                         <LogOut className="size-4" />
                     </button>
@@ -161,7 +162,7 @@ function Shell({
 
     return (
         <div className="flex min-h-screen bg-slate-100 text-sm">
-            <aside className="sticky top-0 hidden h-screen w-60 shrink-0 border-r border-slate-200 md:block">
+            <aside className="sticky top-0 hidden h-screen w-60 shrink-0 md:block">
                 {sidebar}
             </aside>
 
