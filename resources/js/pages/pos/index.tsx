@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, router, useForm, usePage } from '@inertiajs/react';
 import {
   Plus, Minus, Trash2, Search, UserPlus, CreditCard, Banknote, Smartphone,
-  Receipt, RotateCcw, ShoppingCart, X, Check, AlertCircle, Loader2, Package
+  Receipt, RotateCcw, ShoppingCart, X, Check, AlertCircle, Loader2, Package, LayoutDashboard
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import AppLayout from '@/layouts/app-layout';
@@ -231,6 +231,19 @@ export default function PosIndex({
     <AppLayout fullscreen title="POS Terminal">
       <Head title="POS Terminal" />
       
+      <div className="flex h-14 shrink-0 items-center gap-3 border-b border-slate-200 bg-[#0A1633] px-4">
+        <Link
+          href="/dashboard"
+          prefetch="hover"
+          title="Back to Dashboard"
+          aria-label="Back to Dashboard"
+          className="flex items-center gap-2 rounded-xl bg-white/10 px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-white/20 focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:outline-none"
+        >
+          <LayoutDashboard className="size-4" />
+          <span className="hidden sm:inline">Dashboard</span>
+        </Link>
+        <p className="truncate text-sm font-bold text-white">POS Terminal</p>
+      </div>
       <div className="flex h-full bg-slate-50">
         {/* Left Panel - Products */}
         <div className="flex flex-col w-full lg:w-3/5 border-r border-slate-200 bg-white">
