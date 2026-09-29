@@ -2,14 +2,14 @@
     "version": 2,
     "framework": null,
     "builds": [
-        { "src": "api/index.php", "use": "vercel-php@0.9.0" },
+        { "src": "server/index.php", "use": "vercel-php@0.9.0" },
         { "src": "public/**", "use": "@vercel/static" }
     ],
     "routes": [
         { "src": "/favicon.ico", "dest": "/public/favicon.ico" },
         { "src": "/favicon.svg", "dest": "/public/favicon.svg" },
         { "src": "/apple-touch-icon.png", "dest": "/public/apple-touch-icon.png" },
-        { "src": "/(.*)", "dest": "/api/index.php" }
+        { "src": "/(.*)", "dest": "/server/index.php" }
     ],
     "env": {
         "APP_NAME": "SquarePOS",
