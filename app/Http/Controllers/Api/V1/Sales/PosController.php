@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1\Sales;
 
 use App\Http\Controllers\Api\V1\BaseApiController;
+use App\Models\AuditLog;
 use App\Models\CashSession;
 use App\Models\Customer;
 use App\Models\EmployeeCommission;
@@ -10,6 +11,7 @@ use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use App\Models\LoyaltyTransaction;
 use App\Models\Payment;
+use App\Models\PaymentMethod;
 use App\Models\Product;
 use App\Models\SalesOrder;
 use App\Models\SalesOrderItem;
@@ -88,22 +90,48 @@ class PosController extends BaseApiController
             return $this->error('Cash session is not open', 400);
         }
 
-        return DB::transaction(function () use ($data) {
+        return DB::transaction(function () use ($data, $request) {
             $employee = auth()->user()->employee;
+            $user = auth()->user();
+            $warehouseId = $employee->branch?->warehouses()->first()?->id;
 
-            // Calculate totals
+            // Calculate totals using server-side prices unless override is permitted + audited
             $subtotal = 0;
             $totalDiscount = $data['discount'] ?? 0;
             $totalTax = $data['tax'] ?? 0;
+            $priceOverrides = [];
 
             foreach ($data['items'] as $item) {
-                $itemTotal = $item['quantity'] * $item['unit_price'];
+                $product = Product::findOrFail($item['product_id']);
+                if ($product->status !== 'active') {
+                    throw new \DomainException("Product {$product->name} is inactive.");
+                }
+                $serverPrice = (float) $product->selling_price;
+                $givenPrice = (float) $item['unit_price'];
+                if (abs($givenPrice - $serverPrice) > 0.0001) {
+                    if (! $user->hasPermission('sales.price_override')) {
+                        throw new \DomainException("Price override denied for {$product->name}.");
+                    }
+                    $priceOverrides[] = [
+                        'product' => $product->name,
+                        'before' => $serverPrice,
+                        'after' => $givenPrice,
+                    ];
+                }
+                $itemTotal = $item['quantity'] * $givenPrice;
                 $itemDiscount = $item['discount'] ?? 0;
                 $itemTax = $item['tax'] ?? 0;
                 $subtotal += $itemTotal - $itemDiscount + $itemTax;
             }
 
             $total = $subtotal - $totalDiscount + $totalTax;
+
+            $paidSum = collect($data['payments'])->sum(fn ($p) => (float) $p['amount']);
+            $hasCredit = collect($data['payments'])->contains(fn ($p) => PaymentMethod::find($p['payment_method_id'])?->code === 'credit');
+            if ($paidSum < $total && ! $hasCredit && empty($data['customer_id'])) {
+                throw new \DomainException('Payment insufficient: received '.$paidSum.' of '.$total.'.');
+            }
+            $invoiceStatus = $paidSum >= $total ? 'paid' : ($paidSum > 0 ? 'partial' : 'unpaid');
 
             // Create sales order
             $salesOrder = SalesOrder::create([
@@ -140,28 +168,31 @@ class PosController extends BaseApiController
                     'total' => $itemNetTotal,
                 ]);
 
-                // Update stock
+                // Update stock with row lock + availability check
                 $stock = Stock::where('product_id', $item['product_id'])
-                    ->where('warehouse_id', $employee->branch?->warehouses()->first()?->id)
+                    ->where('warehouse_id', $warehouseId)
+                    ->lockForUpdate()
                     ->first();
 
-                if ($stock) {
-                    $stock->quantity -= $item['quantity'];
-                    $stock->save();
-
-                    // Create stock movement
-                    StockMovement::create([
-                        'product_id' => $item['product_id'],
-                        'warehouse_id' => $stock->warehouse_id,
-                        'movement_type' => 'out',
-                        'reference_type' => 'sales_order',
-                        'reference_id' => $salesOrder->id,
-                        'quantity' => -$item['quantity'],
-                        'unit_cost' => $costPrice,
-                        'balance_after' => $stock->quantity,
-                        'employee_id' => $employee->id,
-                    ]);
+                if (! $stock || (float) $stock->quantity < (float) $item['quantity']) {
+                    throw new \DomainException("Insufficient stock for {$product->name}.");
                 }
+                $before = (float) $stock->quantity;
+                $stock->quantity = $before - (float) $item['quantity'];
+                $stock->save();
+
+                // Create stock movement
+                StockMovement::create([
+                    'product_id' => $item['product_id'],
+                    'warehouse_id' => $stock->warehouse_id,
+                    'movement_type' => 'sale',
+                    'reference_type' => 'sales_order',
+                    'reference_id' => $salesOrder->id,
+                    'quantity' => -$item['quantity'],
+                    'unit_cost' => $costPrice,
+                    'balance_after' => $stock->quantity,
+                    'employee_id' => $employee->id,
+                ]);
             }
 
             // Create invoice
@@ -174,9 +205,9 @@ class PosController extends BaseApiController
                 'discount' => $totalDiscount,
                 'tax' => $totalTax,
                 'total' => $total,
-                'paid_amount' => $total,
-                'due_amount' => 0,
-                'status' => 'paid',
+                'paid_amount' => min($paidSum, $total),
+                'due_amount' => max(0, $total - $paidSum),
+                'status' => $invoiceStatus,
             ]);
 
             // Create invoice items
@@ -234,6 +265,19 @@ class PosController extends BaseApiController
                     ]);
                 }
             }
+
+            AuditLog::create([
+                'company_id' => $employee->company_id,
+                'user_id' => auth()->id(),
+                'branch_id' => $employee->branch_id,
+                'action' => 'SALE_CREATED',
+                'module' => 'sales',
+                'table_name' => 'invoices',
+                'record_id' => $invoice->id,
+                'new_values' => ['invoice' => $invoice->invoice_number, 'total' => $total, 'paid' => $paidSum, 'status' => $invoiceStatus, 'price_overrides' => $priceOverrides],
+                'ip_address' => $request->ip(),
+                'user_agent' => substr((string) $request->userAgent(), 0, 500),
+            ]);
 
             return $this->success([
                 'sales_order' => $salesOrder->load('items.product'),

@@ -59,6 +59,8 @@ export default function AppLayout({ children, fullscreen = false, title }: AppLa
                             <Link
                                 key={l.label}
                                 href={l.href}
+                                prefetch="hover"
+                                cacheFor="30s"
                                 title={l.label}
                                 aria-label={l.label}
                                 className={cn(

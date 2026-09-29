@@ -16,10 +16,25 @@ class DashboardController extends Controller
         $today = now()->toDateString();
         $yesterday = now()->subDay()->toDateString();
 
-        $todaySalesTotal = (float) Invoice::whereDate('invoice_date', $today)->where('status', 'paid')->sum('total');
-        $todayOrderCount = Invoice::whereDate('invoice_date', $today)->where('status', 'paid')->count();
-        $yesterdaySalesTotal = (float) Invoice::whereDate('invoice_date', $yesterday)->where('status', 'paid')->sum('total');
-        $yesterdayOrderCount = Invoice::whereDate('invoice_date', $yesterday)->where('status', 'paid')->count();
+        $daily = Invoice::query()
+            ->where('status', 'paid')
+            ->whereDate('invoice_date', '>=', now()->subDays(6)->toDateString())
+            ->groupBy('invoice_date')
+            ->selectRaw('DATE(invoice_date) as day, SUM(total) as total, COUNT(*) as orders')
+            ->pluck('total', 'day')
+            ->all();
+        $dailyCount = Invoice::query()
+            ->where('status', 'paid')
+            ->whereDate('invoice_date', '>=', now()->subDays(6)->toDateString())
+            ->groupBy('invoice_date')
+            ->selectRaw('DATE(invoice_date) as day, COUNT(*) as orders')
+            ->pluck('orders', 'day')
+            ->all();
+
+        $todaySalesTotal = (float) ($daily[$today] ?? 0);
+        $todayOrderCount = (int) ($dailyCount[$today] ?? 0);
+        $yesterdaySalesTotal = (float) ($daily[$yesterday] ?? 0);
+        $yesterdayOrderCount = (int) ($dailyCount[$yesterday] ?? 0);
         $lowStockCount = Stock::where('quantity', '<=', 5)->count();
         $totalProducts = Product::count();
 
@@ -32,7 +47,7 @@ class DashboardController extends Controller
             $date = now()->subDays($i)->toDateString();
             $weekSeries[] = [
                 'day' => now()->subDays($i)->format('D'),
-                'total' => (float) Invoice::whereDate('invoice_date', $date)->where('status', 'paid')->sum('total'),
+                'total' => (float) ($daily[$date] ?? 0),
             ];
         }
 
