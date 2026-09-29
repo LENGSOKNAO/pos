@@ -53,10 +53,10 @@ export default function Dashboard({ stats }: { stats: Stats }) {
     const up = stats.salesDelta >= 0;
     const maxDay = Math.max(1, ...stats.weekSeries.map((d) => d.total));
     const cards = [
-        { label: "Today's sales", value: money(stats.todaySalesTotal), sub: `${up ? '+' : ''}${stats.salesDelta}% vs yesterday`, icon: Receipt, good: up },
-        { label: "Today's orders", value: String(stats.todayOrderCount), sub: `${stats.yesterdayOrderCount} yesterday`, icon: ShoppingBag, good: true },
-        { label: 'Low stock alerts', value: String(stats.lowStockCount), sub: 'needs restock', icon: PackageSearch, good: stats.lowStockCount === 0 },
-        { label: 'Total products', value: String(stats.totalProducts), sub: 'in catalog', icon: Package, good: true },
+        { label: "Today's sales", value: money(stats.todaySalesTotal), sub: `${up ? '+' : ''}${stats.salesDelta}% vs yesterday`, icon: Receipt, good: up, accent: 'bg-blue-50 text-blue-700' },
+        { label: "Today's orders", value: String(stats.todayOrderCount), sub: `${stats.yesterdayOrderCount} yesterday`, icon: ShoppingBag, good: true, accent: 'bg-violet-50 text-violet-700' },
+        { label: 'Low stock alerts', value: String(stats.lowStockCount), sub: 'needs restock', icon: PackageSearch, good: stats.lowStockCount === 0, accent: 'bg-amber-50 text-amber-700' },
+        { label: 'Total products', value: String(stats.totalProducts), sub: 'in catalog', icon: Package, good: true, accent: 'bg-emerald-50 text-emerald-700' },
     ];
     return (
         <AppLayout title="Dashboard">
@@ -87,15 +87,15 @@ export default function Dashboard({ stats }: { stats: Stats }) {
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
                 {cards.map((c) => (
-                    <Card key={c.label} className="rounded-2xl border-slate-200 shadow-sm">
+                    <Card key={c.label} className="rounded-2xl border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.05)]">
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-sm font-semibold text-slate-500">{c.label}</CardTitle>
-                            <span className="flex size-9 items-center justify-center rounded-xl bg-[#0A1633] text-white">
+                            <CardTitle className="text-[13px] font-semibold text-slate-500">{c.label}</CardTitle>
+                            <span className={`flex size-9 items-center justify-center rounded-xl ${c.accent}`}>
                                 <c.icon className="size-4" />
                             </span>
                         </CardHeader>
                         <CardContent>
-                            <div className="text-3xl font-extrabold tracking-tight tabular-nums">{c.value}</div>
+                            <div className="text-[28px] leading-8 font-extrabold tracking-tight text-slate-900 tabular-nums">{c.value}</div>
                             <p className={`mt-1 flex items-center gap-1 text-xs font-medium ${c.good ? 'text-emerald-600' : 'text-red-600'}`}>
                                 {c.good ? <ArrowUpRight className="size-3" /> : <ArrowDownRight className="size-3" />} {c.sub}
                             </p>
@@ -105,28 +105,28 @@ export default function Dashboard({ stats }: { stats: Stats }) {
             </div>
 
             <div className="mt-4 grid gap-4 lg:grid-cols-3">
-                <Card className="rounded-2xl border-slate-200 shadow-sm lg:col-span-2">
+                <Card className="rounded-2xl border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.05)] lg:col-span-2">
                     <CardHeader className="flex flex-row items-center justify-between">
                         <CardTitle className="text-sm font-semibold">Last 7 days</CardTitle>
                         <span className="text-xs text-slate-500">revenue per day</span>
                     </CardHeader>
                     <CardContent>
-                        <div className="flex h-44 items-end gap-2">
+                        <div className="flex h-44 items-end gap-2 border-b border-slate-100 pb-0">
                             {stats.weekSeries.map((d) => (
-                                <div key={d.day} className="flex flex-1 flex-col items-center gap-1">
-                                    <span className="text-[11px] font-semibold text-slate-500 tabular-nums">{d.total > 0 ? `$${Math.round(d.total)}` : ''}</span>
+                                <div key={d.day} className="group flex h-full flex-1 flex-col items-center justify-end gap-1.5">
+                                    <span className="text-[11px] font-semibold text-slate-400 tabular-nums opacity-0 transition-opacity group-hover:opacity-100">{d.total > 0 ? `$${Math.round(d.total)}` : ''}</span>
                                     <div
-                                        className="w-full rounded-t-md bg-blue-600 transition-all"
-                                        style={{ height: `${Math.max(4, (d.total / maxDay) * 140)}px` }}
+                                        className="w-full max-w-10 rounded-t-lg bg-blue-600/90 transition-all group-hover:bg-blue-600"
+                                        style={{ height: `${Math.max(4, (d.total / maxDay) * 118)}px` }}
                                         title={`${d.day}: ${money(d.total)}`}
                                     />
-                                    <span className="text-[11px] text-slate-500">{d.day}</span>
+                                    <span className="pb-2 text-[11px] font-medium text-slate-400">{d.day}</span>
                                 </div>
                             ))}
                         </div>
                     </CardContent>
                 </Card>
-                <Card className="rounded-2xl border-slate-200 shadow-sm">
+                <Card className="rounded-2xl border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.05)]">
                     <CardHeader>
                         <CardTitle className="text-sm font-semibold">Top sellers · 7 days</CardTitle>
                     </CardHeader>
@@ -148,7 +148,7 @@ export default function Dashboard({ stats }: { stats: Stats }) {
             </div>
 
             <div className="mt-4 grid gap-4 lg:grid-cols-2">
-                <Card className="rounded-2xl border-slate-200 shadow-sm">
+                <Card className="rounded-2xl border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.05)]">
                     <CardHeader className="flex flex-row items-center justify-between">
                         <CardTitle className="text-sm font-semibold">Recent sales</CardTitle>
                         <Link href="/sales" className="text-xs font-semibold text-blue-700 hover:underline">
@@ -176,7 +176,7 @@ export default function Dashboard({ stats }: { stats: Stats }) {
                         ))}
                     </CardContent>
                 </Card>
-                <Card className="rounded-2xl border-slate-200 shadow-sm">
+                <Card className="rounded-2xl border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.05)]">
                     <CardHeader className="flex flex-row items-center justify-between">
                         <CardTitle className="text-sm font-semibold">Needs restock</CardTitle>
                         <Link href="/inventory/stock" className="text-xs font-semibold text-blue-700 hover:underline">

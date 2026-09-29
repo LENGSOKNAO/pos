@@ -86,7 +86,7 @@ export default function AppLayout({ children, fullscreen = false, title }: AppLa
                 </button>
             </aside>
             <div className="flex min-w-0 flex-1 flex-col">
-                <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-slate-200 bg-white/90 px-4 backdrop-blur sm:px-6">
+                <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-slate-200 bg-white/90 px-4 shadow-[0_1px_2px_rgba(15,23,42,0.04)] backdrop-blur sm:px-6">
                     <div className="min-w-0 leading-tight">
                         <p className="truncate text-xs font-medium text-slate-400">SquarePOS / Back Office · {today}</p>
                         <h1 className="truncate text-xl font-bold tracking-tight text-slate-900">{title ?? activeLabel}</h1>

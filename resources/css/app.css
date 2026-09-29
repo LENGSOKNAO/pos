@@ -91,7 +91,34 @@
     * {
         @apply border-border;
     }
+    html {
+        -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
+    }
     body {
         @apply bg-background text-foreground;
+    }
+    ::selection {
+        @apply bg-blue-600/15 text-inherit;
+    }
+    ::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+    }
+    ::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+        @apply rounded-full bg-slate-300;
+        border: 2px solid transparent;
+        background-clip: content-box;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        @apply bg-slate-400;
+        border: 2px solid transparent;
+        background-clip: content-box;
+    }
+    input[type='search']::-webkit-search-cancel-button {
+        cursor: pointer;
     }
 }
