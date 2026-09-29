@@ -1,11 +1,11 @@
-import { Head, router } from '@inertiajs/react';
+import { Head, router, Deferred } from '@inertiajs/react';
 import { useState } from 'react';
 import { PackageSearch, Plus, RotateCcw } from 'lucide-react';
 import AppLayout from '@/layouts/app-layout';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { EmptyState, PageHeader } from '@/components/admin';
+import { CardsSkeleton, EmptyState, PageHeader, RowsSkeleton } from '@/components/admin';
 
 interface Summary {
     revenue: number;
@@ -100,6 +100,7 @@ export default function ReportsIndex({
                 </CardContent>
             </Card>
 
+            <Deferred data={['summary', 'topProducts', 'salesByDay']} fallback={<><CardsSkeleton count={6} /><div className="mt-4"><RowsSkeleton count={5} /></div></>}>
             <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 {cards.map((c) => (
                     <Card key={c.label} className="rounded-2xl border-slate-200 shadow-[0_1px_2px_rgba(15,23,42,0.05)]">
@@ -147,6 +148,7 @@ export default function ReportsIndex({
                     </CardContent>
                 </Card>
             </div>
+            </Deferred>
         </AppLayout>
     );
 }

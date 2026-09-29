@@ -1,11 +1,11 @@
-import { Head, router } from '@inertiajs/react';
+import { Head, router, Deferred } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
 import { Trash2 } from 'lucide-react';
 import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { PageHeader } from '@/components/admin';
+import { PageHeader, RowsSkeleton } from '@/components/admin';
 
 interface UnitRef {
     id: number;
@@ -96,6 +96,7 @@ export default function PurchaseCreate({ suppliers, warehouses, products }: Prop
                 </div>
                 <div>
                     <p className="mb-2 text-sm font-semibold text-slate-900">Line items</p>
+                    <Deferred data="products" fallback={<RowsSkeleton count={2} />}>
                     <div className="space-y-2">
                         {rows.map((r, i) => (
                             <div key={i} className="grid grid-cols-1 gap-2 rounded-xl border border-slate-200 bg-slate-50/50 p-3 md:grid-cols-[1fr_120px_140px_auto]">
@@ -113,6 +114,7 @@ export default function PurchaseCreate({ suppliers, warehouses, products }: Prop
                             </div>
                         ))}
                     </div>
+                    </Deferred>
                 </div>
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <Button variant="outline" onClick={() => setRows((prev) => [...prev, { product_unit_id: 0, quantity: '1', unit_cost: '0' }])} className="h-10 rounded-xl border-slate-200">

@@ -1,6 +1,6 @@
 import { Head } from '@inertiajs/react';
 import { useState } from 'react';
-import { Link, router, useForm, usePage } from '@inertiajs/react';
+import { Link, router, useForm, usePage, Deferred } from '@inertiajs/react';
 import { Plus, Search, Filter, MoreHorizontal, Edit, Trash2, Eye, Package, Barcode, Tag, Box, Calendar } from 'lucide-react';
 import AppLayout from '@/layouts/app-layout';
 import { DataTable, Column } from '@/components/ui/data-table';
@@ -10,6 +10,7 @@ import { Select } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
 import { FormField, FormSection, FormActions } from '@/components/ui/form';
+import { TableSkeleton } from '@/components/admin';
 import { api } from '@/services/api';
 import { useAuth } from '@/hooks/useAuth';
 import { Product } from '@/types';
@@ -520,6 +521,7 @@ export default function ProductsIndex({
         </div>
       </div>
 
+      <Deferred data="products" fallback={<TableSkeleton cols={6} />}>
       <DataTable
         columns={columns}
         data={safeProducts.data ?? []}
@@ -539,6 +541,7 @@ export default function ProductsIndex({
         sortOrder={safeProducts.sort_order}
         onSort={(key, order) => router.get(`/products?sort_by=${key}&sort_order=${order}`)}
       />
+      </Deferred>
     </AppLayout>
   );
 }

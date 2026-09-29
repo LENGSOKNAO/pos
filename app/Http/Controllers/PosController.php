@@ -21,13 +21,12 @@ class PosController extends Controller
         $branchId = $employee?->branch_id;
 
         // Get products for this company
-        $products = Product::with(['category', 'brand', 'unit'])
+        $productsQuery = Product::with(['category', 'brand', 'unit'])
             ->withSum('stock as stock_quantity', 'quantity')
             ->withSum('stock as stock_reserved', 'reserved_quantity')
             ->where('company_id', $companyId)
             ->where('status', 'active')
-            ->orderBy('name')
-            ->paginate(50);
+            ->orderBy('name');
 
         // Get categories
         $categories = Category::where('company_id', $companyId)
@@ -54,7 +53,7 @@ class PosController extends Controller
             ->first();
 
         return Inertia::render('pos/index', [
-            'products' => $products,
+            'products' => Inertia::defer(fn () => $productsQuery->paginate(50)),
             'categories' => $categories,
             'customers' => $customers,
             'paymentMethods' => $paymentMethods,

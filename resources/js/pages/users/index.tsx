@@ -1,4 +1,4 @@
-import { Head, useForm } from '@inertiajs/react';
+import { Head, useForm, Deferred } from '@inertiajs/react';
 import { useState } from 'react';
 import { Plus, Users } from 'lucide-react';
 import AppLayout from '@/layouts/app-layout';
@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { EmptyState, PageHeader } from '@/components/admin';
+import { EmptyState, PageHeader, TableSkeleton } from '@/components/admin';
 
 interface UserRow {
     id: number;
@@ -41,6 +41,7 @@ export default function UsersIndex({ users, roles, branches }: { users?: UserRow
                 description="Manage staff accounts, roles and branches."
                 actions={<Button onClick={() => setOpen(true)} className="h-10 rounded-xl bg-blue-600 font-semibold hover:bg-blue-700"><Plus className="size-4" /> New user</Button>}
             />
+            <Deferred data="users" fallback={<TableSkeleton />}>
             <Card className="overflow-hidden rounded-2xl border-slate-200 p-0 shadow-[0_1px_2px_rgba(15,23,42,0.05)]">
                 <CardHeader className="border-b border-slate-200 px-5"><CardTitle className="text-sm font-semibold">All users ({safeUsers.length})</CardTitle></CardHeader>
                 <CardContent className="p-0">
@@ -67,6 +68,7 @@ export default function UsersIndex({ users, roles, branches }: { users?: UserRow
                     </table>
                 </CardContent>
             </Card>
+            </Deferred>
             <Dialog open={open} onOpenChange={setOpen}>
                 <DialogContent>
                     <DialogHeader><DialogTitle>Create user</DialogTitle></DialogHeader>

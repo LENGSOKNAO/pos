@@ -91,3 +91,69 @@ export function TableHeadRow({ children }: { children: ReactNode }) {
 
 export const thCls = 'h-11 px-4 font-semibold whitespace-nowrap';
 export const tdCls = 'h-11 px-4 align-middle';
+
+function Pulse({ className }: { className?: string }) {
+    return <div className={cn('animate-pulse rounded-lg bg-slate-200/80', className)} />;
+}
+
+export function TableSkeleton({ rows = 6, cols = 5 }: { rows?: number; cols?: number }) {
+    return (
+        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_1px_2px_rgba(15,23,42,0.05)]" aria-label="Loading">
+            <div className="space-y-3">
+                <Pulse className="h-8 w-full" />
+                {Array.from({ length: rows }).map((_, i) => (
+                    <div key={i} className="flex gap-3">
+                        {Array.from({ length: cols }).map((_, j) => (
+                            <Pulse key={j} className="h-6 flex-1" />
+                        ))}
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+export function CardsSkeleton({ count = 4 }: { count?: number }) {
+    return (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Loading">
+            {Array.from({ length: count }).map((_, i) => (
+                <div key={i} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_1px_2px_rgba(15,23,42,0.05)]">
+                    <Pulse className="h-4 w-1/2" />
+                    <Pulse className="mt-3 h-8 w-3/4" />
+                    <Pulse className="mt-2 h-3 w-1/3" />
+                </div>
+            ))}
+        </div>
+    );
+}
+
+export function RowsSkeleton({ count = 4 }: { count?: number }) {
+    return (
+        <div className="space-y-2" aria-label="Loading">
+            {Array.from({ length: count }).map((_, i) => (
+                <div key={i} className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-3">
+                    <Pulse className="size-9 shrink-0 rounded-xl" />
+                    <div className="flex-1 space-y-1.5">
+                        <Pulse className="h-4 w-2/3" />
+                        <Pulse className="h-3 w-1/3" />
+                    </div>
+                    <Pulse className="h-6 w-16" />
+                </div>
+            ))}
+        </div>
+    );
+}
+
+export function GridSkeleton({ count = 10 }: { count?: number }) {
+    return (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5" aria-label="Loading">
+            {Array.from({ length: count }).map((_, i) => (
+                <div key={i} className="rounded-xl border border-slate-200 bg-white p-3">
+                    <Pulse className="h-3 w-1/2" />
+                    <Pulse className="mt-2 h-4 w-3/4" />
+                    <Pulse className="mt-2 h-5 w-1/3" />
+                </div>
+            ))}
+        </div>
+    );
+}

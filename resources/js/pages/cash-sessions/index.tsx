@@ -1,4 +1,4 @@
-import { Head, router } from '@inertiajs/react';
+import { Head, router, Deferred } from '@inertiajs/react';
 import { useState } from 'react';
 import { Plus, Wallet } from 'lucide-react';
 import AppLayout from '@/layouts/app-layout';
@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { EmptyState, PageHeader } from '@/components/admin';
+import { EmptyState, PageHeader, TableSkeleton } from '@/components/admin';
 import { Pagination } from '@/components/ui/pagination';
 
 interface Session {
@@ -47,6 +47,7 @@ export default function CashSessionsIndex({ sessions, registers }: Props) {
                 description="Open and close cash drawers per register."
                 actions={<Button className="h-10 rounded-xl bg-blue-600 font-semibold hover:bg-blue-700" onClick={() => setOpenDlg(true)}><Plus className="size-4" /> Open Session</Button>}
             />
+            <Deferred data="sessions" fallback={<TableSkeleton cols={7} />}>
             <Table>
                 <TableHeader>
                     <TableRow>
@@ -95,6 +96,7 @@ export default function CashSessionsIndex({ sessions, registers }: Props) {
                 <Pagination currentPage={safeSessions.current_page} lastPage={safeSessions.last_page} perPage={safeSessions.per_page} total={safeSessions.total} onPageChange={(page) => router.get('/cash-sessions', { page }, { only: ['sessions'], preserveState: true, preserveScroll: true })} showPerPageSelector={false} buildUrl={() => '/cash-sessions'} prefetchOnly={['sessions']} prefetchData={(page) => ({ page })} />
             </div>
             )}
+            </Deferred>
 
             <Dialog open={openDlg} onOpenChange={setOpenDlg}>
                 <DialogContent>

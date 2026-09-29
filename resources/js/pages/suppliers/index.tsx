@@ -1,4 +1,4 @@
-import { Head, router } from '@inertiajs/react';
+import { Head, router, Deferred } from '@inertiajs/react';
 import { useState } from 'react';
 import { Plus, Truck } from 'lucide-react';
 import AppLayout from '@/layouts/app-layout';
@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { EmptyState, PageHeader, SearchInput, TableHeadRow, TableShell, tdCls, thCls } from '@/components/admin';
+import { EmptyState, PageHeader, SearchInput, TableHeadRow, TableShell, TableSkeleton, tdCls, thCls } from '@/components/admin';
 import { Pagination } from '@/components/ui/pagination';
 
 interface Supplier { id: number; name: string; code: string; phone?: string | null; balance: number; status: string }
@@ -41,6 +41,7 @@ export default function SuppliersIndex({ suppliers, filters }: { suppliers?: Sup
                     </>
                 }
             />
+            <Deferred data="suppliers" fallback={<TableSkeleton />}>
             <TableShell>
                 <TableHeadRow>
                     <th className={thCls}>Name</th>
@@ -73,6 +74,7 @@ export default function SuppliersIndex({ suppliers, filters }: { suppliers?: Sup
                 <Pagination currentPage={safeSuppliers.current_page} lastPage={safeSuppliers.last_page} perPage={safeSuppliers.per_page} total={safeSuppliers.total} onPageChange={goToPage} showPerPageSelector={false} buildUrl={() => '/suppliers'} prefetchOnly={['suppliers']} prefetchData={(page) => pageParams(page)} />
             </div>
             )}
+            </Deferred>
             <Dialog open={open} onOpenChange={setOpen}>
                 <DialogContent>
                     <DialogHeader><DialogTitle>Quick-add supplier</DialogTitle></DialogHeader>

@@ -1,4 +1,4 @@
-import { Head } from '@inertiajs/react';
+import { Head, Deferred } from '@inertiajs/react';
 import { useState, useEffect, useRef } from 'react';
 import { Link, router, useForm, usePage } from '@inertiajs/react';
 import {
@@ -15,6 +15,7 @@ import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/componen
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
 import { FormField } from '@/components/ui/form';
 import { EmptyState } from '@/components/ui/empty-state';
+import { GridSkeleton } from '@/components/admin';
 import { Toast, Toaster } from '@/components/ui/toast';
 import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/services/api';
@@ -275,6 +276,7 @@ export default function PosIndex({
 
           {/* Product Grid */}
           <div className="flex-1 overflow-y-auto p-4">
+            <Deferred data="products" fallback={<GridSkeleton />}>
             {productsToShow.length === 0 ? (
               <EmptyState
                 icon={<Package className="size-8" />}
@@ -313,6 +315,7 @@ export default function PosIndex({
                 ))}
               </div>
             )}
+            </Deferred>
           </div>
         </div>
 

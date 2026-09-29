@@ -1,4 +1,4 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, Deferred } from '@inertiajs/react';
 import { useState } from 'react';
 import { ReceiptText } from 'lucide-react';
 import AppLayout from '@/layouts/app-layout';
@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { EmptyState, PageHeader, TableHeadRow, TableShell, tdCls, thCls } from '@/components/admin';
+import { EmptyState, PageHeader, TableHeadRow, TableShell, TableSkeleton, tdCls, thCls } from '@/components/admin';
 import { Pagination } from '@/components/ui/pagination';
 
 interface Sale {
@@ -70,6 +70,7 @@ export default function SalesIndex({ sales, filters }: { sales?: SalesPaginator;
                 </div>
                 <Button onClick={apply} className="h-10 rounded-xl bg-blue-600 font-semibold hover:bg-blue-700">Filter</Button>
             </Card>
+            <Deferred data="sales" fallback={<TableSkeleton />}>
             <TableShell>
                 <TableHeadRow>
                     <th className={thCls}>Invoice</th>
@@ -104,6 +105,7 @@ export default function SalesIndex({ sales, filters }: { sales?: SalesPaginator;
                 <Pagination currentPage={safeSales.current_page} lastPage={safeSales.last_page} perPage={safeSales.per_page} total={safeSales.total} onPageChange={goToPage} showPerPageSelector={false} buildUrl={() => '/sales'} prefetchOnly={['sales']} prefetchData={(page) => pageParams(page)} />
             </div>
             )}
+            </Deferred>
         </AppLayout>
     );
 }

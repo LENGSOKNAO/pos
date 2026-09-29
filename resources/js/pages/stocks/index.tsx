@@ -1,11 +1,11 @@
-import { Head, router } from '@inertiajs/react';
+import { Head, router, Deferred } from '@inertiajs/react';
 import { useState } from 'react';
 import { Warehouse } from 'lucide-react';
 import AppLayout from '@/layouts/app-layout';
 import StockController from '@/actions/App/Http/Controllers/StockController';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { EmptyState, PageHeader, SearchInput } from '@/components/admin';
+import { EmptyState, PageHeader, SearchInput, TableSkeleton } from '@/components/admin';
 
 interface StockRow {
     id: number;
@@ -40,6 +40,7 @@ export default function StocksIndex({ stocks, filters }: Props) {
                 description="On-hand quantities by warehouse and unit."
                 actions={<SearchInput value={search} onChange={setSearch} onSubmit={submit} placeholder="Search stocks…" />}
             />
+            <Deferred data="stocks" fallback={<TableSkeleton cols={4} />}>
             <Table>
                 <TableHeader>
                     <TableRow>
@@ -67,6 +68,7 @@ export default function StocksIndex({ stocks, filters }: Props) {
                     )}
                 </TableBody>
             </Table>
+            </Deferred>
         </AppLayout>
     );
 }

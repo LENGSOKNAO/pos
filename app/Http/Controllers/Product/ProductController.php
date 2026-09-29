@@ -55,15 +55,13 @@ class ProductController extends Controller
             $query->where('track_serial', $request->boolean('track_serial'));
         }
 
-        $products = $query->latest()->paginate($request->get('per_page', 15));
-
         $categories = Category::where('status', 'active')->orderBy('name')->get();
         $brands = Brand::where('status', 'active')->orderBy('name')->get();
         $units = Unit::orderBy('name')->get();
         $companies = Company::where('status', 'active')->orderBy('name')->get();
 
         return Inertia::render('products/index', [
-            'products' => $products,
+            'products' => Inertia::defer(fn () => $query->latest()->paginate($request->get('per_page', 15))),
             'categories' => $categories,
             'brands' => $brands,
             'units' => $units,

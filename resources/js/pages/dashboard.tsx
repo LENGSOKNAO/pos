@@ -1,10 +1,10 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, Deferred } from '@inertiajs/react';
 import { ArrowDownRight, ArrowUpRight, Package, PackageSearch, Receipt, ReceiptText, ShoppingBag, ShoppingCart, Truck, Wallet } from 'lucide-react';
 import AppLayout from '@/layouts/app-layout';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { EmptyState } from '@/components/admin';
+import { CardsSkeleton, EmptyState, RowsSkeleton } from '@/components/admin';
 
 interface DayTotal {
     day: string;
@@ -49,7 +49,22 @@ interface Stats {
 
 const money = (n: number) => `$${Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-export default function Dashboard({ stats }: { stats: Stats }) {
+const emptyStats: Stats = {
+    todaySalesTotal: 0,
+    todayOrderCount: 0,
+    yesterdaySalesTotal: 0,
+    yesterdayOrderCount: 0,
+    salesDelta: 0,
+    lowStockCount: 0,
+    totalProducts: 0,
+    weekSeries: [],
+    recentSales: [],
+    topProducts: [],
+    lowStockItems: [],
+};
+
+export default function Dashboard({ stats: rawStats }: { stats?: Stats }) {
+    const stats = rawStats ?? emptyStats;
     const up = stats.salesDelta >= 0;
     const maxDay = Math.max(1, ...stats.weekSeries.map((d) => d.total));
     const cards = [
@@ -85,6 +100,7 @@ export default function Dashboard({ stats }: { stats: Stats }) {
                 </div>
             </div>
 
+            <Deferred data="stats" fallback={<><CardsSkeleton /><div className="mt-4"><RowsSkeleton count={5} /></div></>}>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
                 {cards.map((c) => (
                     <Card key={c.label} className="rounded-2xl border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.05)]">
@@ -205,6 +221,7 @@ export default function Dashboard({ stats }: { stats: Stats }) {
                     </CardContent>
                 </Card>
             </div>
+            </Deferred>
         </AppLayout>
     );
 }

@@ -1,4 +1,4 @@
-import { Head, router } from '@inertiajs/react';
+import { Head, router, Deferred } from '@inertiajs/react';
 import { useState } from 'react';
 import { Plus, RotateCcw } from 'lucide-react';
 import AppLayout from '@/layouts/app-layout';
@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { EmptyState, PageHeader, TableHeadRow, TableShell, tdCls, thCls } from '@/components/admin';
+import { EmptyState, PageHeader, TableHeadRow, TableShell, TableSkeleton, tdCls, thCls } from '@/components/admin';
 import { Pagination } from '@/components/ui/pagination';
 
 interface Ret { id: number; return_no: string; sale?: string | null; status: string; total: number; created_at?: string }
@@ -41,6 +41,7 @@ export default function ReturnsIndex({ returns, sales }: { returns?: ReturnsPagi
                 description="Refunds and restocks linked to original sales."
                 actions={<Button onClick={() => setOpen(true)} className="h-10 rounded-xl bg-blue-600 font-semibold hover:bg-blue-700"><Plus className="size-4" /> New return</Button>}
             />
+            <Deferred data="returns" fallback={<TableSkeleton />}>
             <TableShell>
                 <TableHeadRow>
                     <th className={thCls}>Return No</th>
@@ -73,6 +74,7 @@ export default function ReturnsIndex({ returns, sales }: { returns?: ReturnsPagi
                 <Pagination currentPage={safeReturns.current_page} lastPage={safeReturns.last_page} perPage={safeReturns.per_page} total={safeReturns.total} onPageChange={(page) => router.get('/sales-returns', { page }, { only: ['returns'], preserveState: true, preserveScroll: true })} showPerPageSelector={false} buildUrl={() => '/sales-returns'} prefetchOnly={['returns']} prefetchData={(page) => ({ page })} />
             </div>
             )}
+            </Deferred>
             <Dialog open={open} onOpenChange={setOpen}>
                 <DialogContent>
                     <DialogHeader><DialogTitle>New sales return</DialogTitle></DialogHeader>

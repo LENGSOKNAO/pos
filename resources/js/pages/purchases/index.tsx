@@ -1,11 +1,11 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, Deferred } from '@inertiajs/react';
 import { useState } from 'react';
 import { Plus, ShoppingBag } from 'lucide-react';
 import AppLayout from '@/layouts/app-layout';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { EmptyState, PageHeader, SearchInput } from '@/components/admin';
+import { EmptyState, PageHeader, SearchInput, TableSkeleton } from '@/components/admin';
 import { Pagination } from '@/components/ui/pagination';
 
 interface Order {
@@ -54,6 +54,7 @@ export default function PurchasesIndex({ orders, filters }: Props) {
                     </>
                 }
             />
+            <Deferred data="orders" fallback={<TableSkeleton />}>
             <Table>
                 <TableHeader>
                     <TableRow>
@@ -88,6 +89,7 @@ export default function PurchasesIndex({ orders, filters }: Props) {
                 <Pagination currentPage={safeOrders.current_page} lastPage={safeOrders.last_page} perPage={safeOrders.per_page} total={safeOrders.total} onPageChange={goToPage} showPerPageSelector={false} buildUrl={() => '/purchases'} prefetchOnly={['orders']} prefetchData={(page) => pageParams(page)} />
             </div>
             )}
+            </Deferred>
         </AppLayout>
     );
 }

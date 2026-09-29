@@ -1,6 +1,6 @@
 import { Head } from '@inertiajs/react';
 import { useState } from 'react';
-import { Link, router, useForm, usePage } from '@inertiajs/react';
+import { Link, router, useForm, usePage, Deferred } from '@inertiajs/react';
 import { Plus, Search, Filter, Edit, Trash2, Eye, User, CreditCard, DollarSign, RotateCcw } from 'lucide-react';
 import AppLayout from '@/layouts/app-layout';
 import { DataTable, Column } from '@/components/ui/data-table';
@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
 import { FormField, FormSection, FormActions } from '@/components/ui/form';
 import { api } from '@/services/api';
+import { TableSkeleton } from '@/components/admin';
 import { useAuth } from '@/hooks/useAuth';
 
 interface CustomerFormData {
@@ -185,6 +186,7 @@ export default function CustomersIndex({
         </div>
       </div>
 
+      <Deferred data="customers" fallback={<TableSkeleton cols={7} />}>
       <DataTable
         columns={[
           { key: 'customer_code', header: 'Code', accessor: item => <span className="font-mono text-sm">{item.customer_code}</span>, sortable: true },
@@ -209,6 +211,7 @@ export default function CustomersIndex({
         keyAccessor={item => item.id}
         pagination={{ currentPage: safeCustomers.current_page, lastPage: safeCustomers.last_page, perPage: safeCustomers.per_page, total: safeCustomers.total, onPageChange: page => router.get('/customers', { page }, { only: ['customers'], preserveState: true, preserveScroll: true }), buildUrl: () => '/customers', prefetchOnly: ['customers'], prefetchData: (page) => ({ page }) }}
       />
+      </Deferred>
     </AppLayout>
   );
 }
