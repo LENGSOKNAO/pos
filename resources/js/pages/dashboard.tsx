@@ -134,15 +134,15 @@ export default function Dashboard({ stats: rawStats }: { stats?: Stats }) {
                     </CardHeader>
                     <CardContent>
                         <div className="flex h-44 items-end gap-2 px-1 pt-4">
-                            {stats.weekSeries.map((d) => (
+                            {stats.weekSeries.map((d, idx) => (
                                 <div key={d.day} className="group flex h-full flex-1 flex-col items-center justify-end gap-1.5">
                                     <span className="text-[11px] font-bold text-slate-500 tabular-nums opacity-0 transition-opacity group-hover:opacity-100">{Number(d.total) > 0 ? `$${Math.round(Number(d.total))}` : ''}</span>
                                     <div
-                                        className="w-full max-w-12 rounded-t-lg bg-blue-600 transition-all group-hover:bg-blue-700"
+                                        className={`w-full max-w-12 rounded-t-lg transition-all ${idx === stats.weekSeries.length - 1 ? 'bg-blue-600 group-hover:bg-blue-700' : 'bg-blue-100 group-hover:bg-blue-200'}`}
                                         style={{ height: `${Math.max(4, (Number(d.total) / maxDay) * 112)}px` }}
                                         title={`${d.day}: ${money(Number(d.total))}`}
                                     />
-                                    <span className="pb-1 text-[11px] font-semibold text-slate-500">{d.day}</span>
+                                    <span className={`pb-1 text-[11px] tabular-nums ${idx === stats.weekSeries.length - 1 ? 'font-bold text-blue-700' : 'font-semibold text-slate-500'}`}>{d.day}</span>
                                 </div>
                             ))}
                         </div>
@@ -183,7 +183,7 @@ export default function Dashboard({ stats: rawStats }: { stats?: Stats }) {
                         {stats.topProducts.length === 0 && <EmptyState icon={<Package className="size-5" />} title="No top sellers" hint="No sales this week yet." />}
                         {stats.topProducts.map((p, i) => (
                             <div key={p.name} className="flex items-center gap-3 rounded-xl px-2 py-2 transition-colors hover:bg-slate-50">
-                                <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-slate-900 text-xs font-extrabold text-white tabular-nums">{i + 1}</span>
+                                <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-xs font-extrabold text-slate-500 tabular-nums">{i + 1}</span>
                                 <div className="min-w-0 flex-1">
                                     <p className="truncate text-sm font-semibold text-slate-900">{p.name}</p>
                                     <p className="text-xs text-slate-500 tabular-nums">{p.qty} sold · {money(p.revenue)}</p>
