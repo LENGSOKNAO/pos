@@ -523,6 +523,39 @@ class PageController extends Controller
         ]);
     }
 
+    public function notifications(Request $request): Response
+    {
+        return Inertia::render('notifications/index', [
+            'items' => Inertia::defer(fn (): array => Notification::query()
+                ->where(function ($q) use ($request) {
+                    $q->where('user_id', $request->user()->id)->orWhereNull('user_id');
+                })
+                ->orderByDesc('created_at')
+                ->limit(50)
+                ->get()
+                ->map(fn (Notification $n): array => [
+                    'id' => $n->id,
+                    'type' => $n->type,
+                    'title' => $n->title,
+                    'message' => $n->message,
+                    'is_read' => (bool) $n->is_read,
+                    'created_at' => $n->created_at?->format('Y-m-d H:i'),
+                ])->all()),
+            'unreadCount' => Notification::where(function ($q) use ($request) {
+                $q->where('user_id', $request->user()->id)->orWhereNull('user_id');
+            })->where('is_read', false)->count(),
+        ]);
+    }
+
+    public function markNotificationsRead(Request $request)
+    {
+        Notification::where(function ($q) use ($request) {
+            $q->where('user_id', $request->user()->id)->orWhereNull('user_id');
+        })->where('is_read', false)->update(['is_read' => true]);
+
+        return back()->with('success', 'All notifications marked as read.');
+    }
+
     public function settings(): Response
     {
         $company = Company::orderBy('name')->first();

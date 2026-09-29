@@ -49,7 +49,20 @@ export default function SalesIndex({ sales, filters }: { sales?: SalesPaginator;
     return (
         <AppLayout title="Sales History">
             <Head title="Sales History" />
-            <PageHeader title="Sales History" count={safeSales.data.length} description="Completed and pending sales with payment status." />
+            <PageHeader title="Sales History" count={safeSales.data.length} description="Invoices, collections and outstanding balances across every register." />
+            <div className="mb-4 grid grid-cols-2 gap-2 lg:grid-cols-4">
+                {[
+                    { label: 'Invoices', value: String(safeSales.data.length) },
+                    { label: 'Revenue', value: `$${safeSales.data.reduce((s, x) => s + Number(x.grand_total || 0), 0).toFixed(2)}` },
+                    { label: 'Collected', value: `$${safeSales.data.reduce((s, x) => s + Number(x.paid_amount || 0), 0).toFixed(2)}` },
+                    { label: 'Outstanding', value: `$${safeSales.data.reduce((s, x) => s + Number(x.balance || 0), 0).toFixed(2)}` },
+                ].map((s) => (
+                    <div key={s.label} className="rounded-2xl border border-slate-200 bg-white px-4 py-3">
+                        <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">{s.label}</p>
+                        <p className="mt-0.5 text-lg font-extrabold tabular-nums text-slate-900">{s.value}</p>
+                    </div>
+                ))}
+            </div>
             <Card className="mb-4 flex flex-wrap items-end gap-2 rounded-2xl border-slate-200 p-4 shadow-[0_1px_2px_rgba(15,23,42,0.05)]">
                 <div>
                     <label className="mb-1 block text-[11px] font-semibold tracking-wider text-slate-500 uppercase">Status</label>

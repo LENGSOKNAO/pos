@@ -53,13 +53,15 @@ export default function ReturnsIndex({ returns, sales }: { returns?: ReturnsPagi
                 <tbody>
                     {safeReturns.data.map((r) => (
                         <tr key={r.id} className="border-t border-slate-200 hover:bg-slate-50">
-                            <td className={`${tdCls} font-mono font-semibold`}>{r.return_no}</td>
+                            <td className={`${tdCls} font-mono font-semibold text-slate-900`}>{r.return_no}</td>
                             <td className={`${tdCls} font-mono text-xs text-slate-500`}>{r.sale ?? '—'}</td>
-                            <td className={`${tdCls} text-right font-bold tabular-nums`}>${Number(r.total).toFixed(2)}</td>
+                            <td className={`${tdCls} text-right font-bold tabular-nums text-slate-900`}>${Number(r.total).toFixed(2)}</td>
                             <td className={tdCls}>
                                 {r.status === 'completed' || r.status === 'approved'
                                     ? <Badge className="border-transparent bg-emerald-100 text-emerald-700 hover:bg-emerald-100">{r.status}</Badge>
-                                    : <Badge className="border-transparent bg-amber-100 text-amber-800 hover:bg-amber-100">{r.status}</Badge>}
+                                    : r.status === 'pending'
+                                      ? <Badge className="border-transparent bg-amber-100 text-amber-800 hover:bg-amber-100">{r.status}</Badge>
+                                      : <Badge className="border-transparent bg-slate-100 text-slate-600 hover:bg-slate-100">{r.status}</Badge>}
                             </td>
                             <td className={`${tdCls} text-slate-500`}>{r.created_at}</td>
                         </tr>
@@ -70,23 +72,24 @@ export default function ReturnsIndex({ returns, sales }: { returns?: ReturnsPagi
                 </tbody>
             </TableShell>
             {safeReturns.last_page > 1 && (
-            <div className="mt-3 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.05)]">
+            <div className="mt-3 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
                 <Pagination currentPage={safeReturns.current_page} lastPage={safeReturns.last_page} perPage={safeReturns.per_page} total={safeReturns.total} onPageChange={(page) => router.get('/sales-returns', { page }, { only: ['returns'], preserveState: true, preserveScroll: true })} showPerPageSelector={false} buildUrl={() => '/sales-returns'} prefetchOnly={['returns']} prefetchData={(page) => ({ page })} />
             </div>
             )}
             </Deferred>
             <Dialog open={open} onOpenChange={setOpen}>
-                <DialogContent>
+                <DialogContent className="sm:max-w-md">
                     <DialogHeader><DialogTitle>New sales return</DialogTitle></DialogHeader>
+                    <div className="space-y-4 px-6 py-2">
                     <div>
                         <Label className={labelCls}>Sale</Label>
-                        <select value={saleId} onChange={(e) => setSaleId(Number(e.target.value))} className="mt-1 h-10 w-full rounded-xl border border-slate-200 bg-white px-2 text-sm">
+                        <select value={saleId} onChange={(e) => setSaleId(Number(e.target.value))} className="mt-1.5 h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
                             {safeSales.map((s) => <option key={s.id} value={s.id}>{s.invoice_no}</option>)}
                         </select>
                     </div>
                     <div>
                         <Label className={labelCls}>Warehouse ID (restock target)</Label>
-                        <Input value={warehouseId} onChange={(e) => setWarehouseId(e.target.value)} placeholder="e.g. 1" inputMode="numeric" className="mt-1 h-10 rounded-xl" />
+                        <Input value={warehouseId} onChange={(e) => setWarehouseId(e.target.value)} placeholder="e.g. 1" inputMode="numeric" className="mt-1.5 h-10 rounded-xl" />
                     </div>
                     {items.map((row, idx) => (
                         <div key={idx} className="flex gap-2">
@@ -94,11 +97,12 @@ export default function ReturnsIndex({ returns, sales }: { returns?: ReturnsPagi
                             <Input value={row.quantity} onChange={(e) => setItems((p) => p.map((r, i) => (i === idx ? { ...r, quantity: e.target.value } : r)))} placeholder="Qty" className="h-10 w-24 rounded-xl tabular-nums" />
                         </div>
                     ))}
-                    <Button variant="outline" onClick={() => setItems((p) => [...p, { sale_item_id: '', quantity: '1' }])} className="rounded-xl">+ Add line</Button>
+                    <Button variant="outline" onClick={() => setItems((p) => [...p, { sale_item_id: '', quantity: '1' }])} className="h-10 rounded-xl">+ Add line</Button>
                     <p className="text-xs text-slate-500">Find sale item IDs on the sale receipt page. Returns restock the chosen warehouse automatically.</p>
-                    <DialogFooter>
-                        <Button variant="outline" onClick={() => setOpen(false)} className="rounded-xl">Cancel</Button>
-                        <Button onClick={submit} className="rounded-xl bg-blue-600 hover:bg-blue-700">Submit return</Button>
+                    </div>
+                    <DialogFooter className="border-t border-slate-100 px-6 py-4">
+                        <Button variant="outline" onClick={() => setOpen(false)} className="h-10 rounded-xl">Cancel</Button>
+                        <Button onClick={submit} className="h-10 rounded-xl bg-blue-600 hover:bg-blue-700">Submit return</Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>

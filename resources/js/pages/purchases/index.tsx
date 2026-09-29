@@ -44,7 +44,7 @@ export default function PurchasesIndex({ orders, filters }: Props) {
             <PageHeader
                 title="Purchases"
                 count={safeOrders.total}
-                description="Purchase orders from suppliers."
+                description="Inbound purchase orders — stock coming in, costed and received."
                 actions={
                     <>
                         <SearchInput value={search} onChange={setSearch} onSubmit={() => router.get('/purchases', { search }, { preserveState: true })} placeholder="Search PO no or supplier…" />

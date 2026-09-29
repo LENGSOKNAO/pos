@@ -123,7 +123,8 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/security/permissions', fn () => inertia('security/permissions'))->name('security.permissions.index');
     Route::get('/security/audit-logs', fn () => inertia('security/audit-logs'))->name('security.audit-logs.index');
     Route::get('/security/approvals', fn () => inertia('security/approvals'))->name('security.approvals.index');
-    Route::get('/notifications', fn () => inertia('notifications/index'))->name('notifications.index');
+    Route::get('/notifications', [PageController::class, 'notifications'])->name('notifications.index');
+    Route::post('/notifications/read-all', [PageController::class, 'markNotificationsRead'])->name('notifications.readAll');
     Route::get('/reports/sales', fn () => inertia('reports/sales'))->name('reports.sales');
     Route::get('/reports/profit', fn () => inertia('reports/profit'))->name('reports.profit');
     Route::get('/reports/inventory', fn () => inertia('reports/inventory'))->name('reports.inventory');

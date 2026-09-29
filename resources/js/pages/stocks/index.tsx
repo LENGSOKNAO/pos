@@ -37,7 +37,7 @@ export default function StocksIndex({ stocks, filters }: Props) {
             <PageHeader
                 title="Stock"
                 count={safeStocks.length}
-                description="On-hand quantities by warehouse and unit."
+                description="Live on-hand quantities by warehouse — reorder risks surface first."
                 actions={<SearchInput value={search} onChange={setSearch} onSubmit={submit} placeholder="Search stocks…" />}
             />
             <Deferred data="stocks" fallback={<TableSkeleton cols={4} />}>

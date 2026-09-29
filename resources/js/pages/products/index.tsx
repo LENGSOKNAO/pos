@@ -163,7 +163,12 @@ export default function ProductsIndex({
   const columns: Column<any>[] = [
     { key: 'sku', header: 'SKU', accessor: (item) => <span className="font-mono text-sm">{item.sku}</span>, sortable: true },
     { key: 'barcode', header: 'Barcode', accessor: (item) => item.barcode ? <span className="font-mono text-sm">{item.barcode}</span> : '-', sortable: true },
-    { key: 'name', header: 'Name', accessor: (item) => <span className="font-medium">{item.name}</span>, sortable: true },
+    { key: 'name', header: 'Product', accessor: (item) => (
+      <div className="flex items-center gap-2.5">
+        <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-slate-900 text-[11px] font-bold text-white">{String(item.name || '?').slice(0, 2).toUpperCase()}</span>
+        <span><span className="block font-semibold text-slate-900">{item.name}</span><span className="block font-mono text-[11px] text-slate-400">{item.sku}</span></span>
+      </div>
+    ), sortable: true },
     { key: 'category', header: 'Category', accessor: (item) => item.category?.name || '-', sortable: true },
     { key: 'brand', header: 'Brand', accessor: (item) => item.brand?.name || '-', sortable: true },
     { key: 'unit', header: 'Unit', accessor: (item) => item.unit?.symbol || '-', sortable: true },
@@ -189,7 +194,7 @@ export default function ProductsIndex({
       <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="text-xl font-bold tracking-tight text-slate-900">Products</h1>
-          <p className="mt-1 text-sm text-slate-500">Manage your product catalog</p>
+          <p className="mt-1 text-sm text-slate-500">Product catalog — pricing, SKUs and availability at a glance.</p>
         </div>
         {hasPermission('products.create') && (
           <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
@@ -492,7 +497,7 @@ export default function ProductsIndex({
         </Dialog>
       </div>
 
-      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-4 flex flex-col gap-2 rounded-2xl border border-slate-200 bg-white p-3 sm:flex-row sm:items-center">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
           <Input
             placeholder="Search products..."

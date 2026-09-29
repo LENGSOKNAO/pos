@@ -85,7 +85,7 @@ export default function SettingsIndex({ settings }: { settings?: any }) {
       <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="text-xl font-bold tracking-tight text-slate-900">Settings</h1>
-          <p className="mt-1 text-sm text-slate-500">Configure your system settings</p>
+          <p className="mt-1 text-sm text-slate-500">Configure company, POS, invoicing, tax, payments, and alerts.</p>
         </div>
       </div>
 
@@ -202,7 +202,7 @@ export default function SettingsIndex({ settings }: { settings?: any }) {
         </Tabs>
 
         <FormActions>
-          <Button type="submit" className="btn btn-primary" disabled={form.processing}>
+          <Button type="submit" className="h-10 rounded-xl bg-blue-600 font-semibold hover:bg-blue-700" disabled={form.processing}>
             {form.processing ? 'Saving...' : 'Save Settings'}
           </Button>
         </FormActions>

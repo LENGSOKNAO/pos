@@ -74,9 +74,10 @@ export default function PurchaseCreate({ suppliers, warehouses, products }: Prop
     return (
         <AppLayout title="New Purchase">
             <Head title="New Purchase" />
-            <PageHeader title="New Purchase" description="Receive stock from a supplier into a warehouse." />
-            <Card className="space-y-4 rounded-2xl border-slate-200 p-5 shadow-[0_1px_2px_rgba(15,23,42,0.05)] sm:p-6">
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <PageHeader title="New Purchase" description="Three quick steps — source, line items, then review and save. One form, nothing lost." />
+            <div className="mb-3 flex items-center gap-2 text-xs font-semibold text-slate-500"><span className="rounded-full bg-slate-900 px-2.5 py-1 text-white">1 Supplier and warehouse</span><span>→</span><span className="rounded-full bg-slate-100 px-2.5 py-1">2 Line items</span><span>→</span><span className="rounded-full bg-slate-100 px-2.5 py-1">3 Review and save</span></div>
+            <Card className="space-y-6 rounded-2xl border-slate-200 p-5 shadow-[0_1px_2px_rgba(15,23,42,0.05)] sm:p-6">
+                <section><p className="mb-2 text-sm font-bold text-slate-900">1 · Supplier and warehouse</p><div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div>
                         <label className={labelCls}>Supplier</label>
                         <select value={supplierId} onChange={(e) => setSupplierId(Number(e.target.value))} className={selectCls}>
@@ -93,9 +94,7 @@ export default function PurchaseCreate({ suppliers, warehouses, products }: Prop
                             ))}
                         </select>
                     </div>
-                </div>
-                <div>
-                    <p className="mb-2 text-sm font-semibold text-slate-900">Line items</p>
+                </div></section><section><p className="mb-2 text-sm font-bold text-slate-900">2 · Line items</p><div>
                     <Deferred data="products" fallback={<RowsSkeleton count={2} />}>
                     <div className="space-y-2">
                         {rows.map((r, i) => (
@@ -115,8 +114,7 @@ export default function PurchaseCreate({ suppliers, warehouses, products }: Prop
                         ))}
                     </div>
                     </Deferred>
-                </div>
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                </div></section><section className="rounded-2xl bg-slate-50 p-4"><p className="mb-2 text-sm font-bold text-slate-900">3 · Review and save</p><div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <Button variant="outline" onClick={() => setRows((prev) => [...prev, { product_unit_id: 0, quantity: '1', unit_cost: '0' }])} className="h-10 rounded-xl border-slate-200">
                         + Add row
                     </Button>
@@ -125,6 +123,7 @@ export default function PurchaseCreate({ suppliers, warehouses, products }: Prop
                 <Button onClick={submit} disabled={processing || !supplierId || !warehouseId} className="h-12 w-full rounded-xl bg-blue-600 text-base font-bold hover:bg-blue-700">
                     {processing ? 'Saving…' : `Save Purchase — $${total.toFixed(2)}`}
                 </Button>
+                </section>
             </Card>
         </AppLayout>
     );

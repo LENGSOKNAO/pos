@@ -142,7 +142,7 @@ export default function CustomersIndex({
       <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="text-xl font-bold tracking-tight text-slate-900">Customers</h1>
-          <p className="mt-1 text-sm text-slate-500">Manage your customers</p>
+          <p className="mt-1 text-sm text-slate-500">Customer book — credit, loyalty and lifetime value in one place.</p>
         </div>
         <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
           <DialogTrigger asChild>
@@ -178,7 +178,7 @@ export default function CustomersIndex({
         </Dialog>
       </div>
 
-      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-4 flex flex-col gap-2 rounded-2xl border border-slate-200 bg-white p-3 sm:flex-row sm:items-center">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
           <Input placeholder="Search customers..." value={search} onChange={e => setSearch(e.target.value)} className="w-full sm:w-64" />
           <Select value={groupFilter} onChange={e => setGroupFilter(e.target.value)} className="w-full sm:w-48"><option value="">All Groups</option>{safeGroups.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}</Select>

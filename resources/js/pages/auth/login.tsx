@@ -56,7 +56,7 @@ export default function Login() {
             <div className="flex flex-1 items-center justify-center bg-slate-50 px-4 py-10">
                 <div className="w-full max-w-sm">
                     <div className="mb-6 flex items-center gap-2.5 lg:hidden">
-                        <span className="flex size-9 items-center justify-center rounded-lg bg-blue-600 text-base font-black text-white">S</span>
+                        <span className="flex size-9 items-center justify-center rounded-xl bg-blue-600 text-base font-black text-white">S</span>
                         <span className="text-lg font-bold tracking-tight text-slate-900">SquarePOS</span>
                     </div>
                     <Card className="rounded-2xl border border-slate-200 bg-white shadow-sm">

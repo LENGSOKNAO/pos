@@ -96,6 +96,36 @@ class DashboardController extends Controller
                         'quantity' => (float) $stock->quantity,
                     ]);
 
+                $paymentMethods = DB::table('payments')
+                    ->join('payment_methods', 'payment_methods.id', '=', 'payments.payment_method_id')
+                    ->join('invoices', 'invoices.id', '=', 'payments.invoice_id')
+                    ->where('payments.status', 'completed')
+                    ->where('invoices.invoice_date', '>=', now()->subDays(30))
+                    ->groupBy('payment_methods.id', 'payment_methods.name')
+                    ->selectRaw('payment_methods.name as name, SUM(payments.amount) as total')
+                    ->orderByDesc('total')
+                    ->limit(5)
+                    ->get()
+                    ->map(fn ($row): array => [
+                        'name' => $row->name,
+                        'total' => (float) $row->total,
+                    ]);
+
+                $branchPerformance = DB::table('invoices')
+                    ->join('branches', 'branches.id', '=', 'invoices.branch_id')
+                    ->where('invoices.status', 'paid')
+                    ->where('invoices.invoice_date', '>=', now()->subDays(30))
+                    ->groupBy('branches.id', 'branches.name')
+                    ->selectRaw('branches.name as name, SUM(invoices.total) as total, COUNT(*) as orders')
+                    ->orderByDesc('total')
+                    ->limit(5)
+                    ->get()
+                    ->map(fn ($row): array => [
+                        'name' => $row->name,
+                        'total' => (float) $row->total,
+                        'orders' => (int) $row->orders,
+                    ]);
+
                 return [
                     'todaySalesTotal' => $todaySalesTotal,
                     'todayOrderCount' => $todayOrderCount,
@@ -108,6 +138,8 @@ class DashboardController extends Controller
                     'recentSales' => $recentSales,
                     'topProducts' => $topProducts,
                     'lowStockItems' => $lowStockItems,
+                    'paymentMethods' => $paymentMethods,
+                    'branchPerformance' => $branchPerformance,
                 ];
             }),
         ]);

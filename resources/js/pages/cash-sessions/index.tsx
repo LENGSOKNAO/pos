@@ -29,6 +29,17 @@ interface Props {
 
 const labelCls = 'text-[11px] font-semibold tracking-wider text-slate-500 uppercase';
 
+function diffCls(s: Session): string {
+    if (s.closing_balance === null) {
+        return 'text-slate-400';
+    }
+    const d = Number(s.closing_balance) - Number(s.expected);
+    if (d === 0) {
+        return 'text-emerald-700';
+    }
+    return d > 0 ? 'text-blue-700' : 'text-red-600';
+}
+
 export default function CashSessionsIndex({ sessions, registers }: Props) {
     const safeSessions = sessions ?? { data: [] as Session[], current_page: 1, last_page: 1, per_page: 15, total: 0 };
     const safeRegisters = Array.isArray(registers) ? registers : [];
@@ -47,27 +58,34 @@ export default function CashSessionsIndex({ sessions, registers }: Props) {
                 description="Open and close cash drawers per register."
                 actions={<Button className="h-10 rounded-xl bg-blue-600 font-semibold hover:bg-blue-700" onClick={() => setOpenDlg(true)}><Plus className="size-4" /> Open Session</Button>}
             />
-            <Deferred data="sessions" fallback={<TableSkeleton cols={7} />}>
+            <Deferred data="sessions" fallback={<TableSkeleton cols={8} />}>
+            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
             <Table>
                 <TableHeader>
-                    <TableRow>
+                    <TableRow className="bg-slate-50">
                         <TableHead>#</TableHead>
                         <TableHead>Register</TableHead>
                         <TableHead className="text-right">Opening</TableHead>
                         <TableHead className="text-right">Expected</TableHead>
                         <TableHead className="text-right">Closing</TableHead>
+                        <TableHead className="text-right">Difference</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead><span className="sr-only">Actions</span></TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {safeSessions.data.map((s) => (
-                        <TableRow key={s.id}>
-                            <TableCell className="font-mono text-xs">#{s.id}</TableCell>
-                            <TableCell className="font-semibold">{s.register}</TableCell>
-                            <TableCell className="text-right tabular-nums">${Number(s.opening_balance).toFixed(2)}</TableCell>
-                            <TableCell className="text-right tabular-nums">${Number(s.expected).toFixed(2)}</TableCell>
-                            <TableCell className="text-right tabular-nums">{s.closing_balance === null ? <span className="text-slate-400">—</span> : `$${Number(s.closing_balance).toFixed(2)}`}</TableCell>
+                    {safeSessions.data.map((s) => {
+                        const diff = s.closing_balance === null ? null : Number(s.closing_balance) - Number(s.expected);
+                        return (
+                        <TableRow key={s.id} className="hover:bg-slate-50">
+                            <TableCell className="font-mono text-xs text-slate-500">#{s.id}</TableCell>
+                            <TableCell className="font-semibold text-slate-900">{s.register}</TableCell>
+                            <TableCell className="text-right tabular-nums text-slate-700">${Number(s.opening_balance).toFixed(2)}</TableCell>
+                            <TableCell className="text-right tabular-nums text-slate-700">${Number(s.expected).toFixed(2)}</TableCell>
+                            <TableCell className="text-right tabular-nums text-slate-700">{s.closing_balance === null ? <span className="text-slate-400">—</span> : `$${Number(s.closing_balance).toFixed(2)}`}</TableCell>
+                            <TableCell className={`text-right font-semibold tabular-nums ${diffCls(s)}`}>
+                                {diff === null ? '—' : `${diff > 0 ? '+' : ''}$${diff.toFixed(2)}`}
+                            </TableCell>
                             <TableCell>
                                 {s.status === 'open'
                                     ? <Badge className="border-transparent bg-emerald-100 text-emerald-700 hover:bg-emerald-100">{s.status}</Badge>
@@ -81,29 +99,32 @@ export default function CashSessionsIndex({ sessions, registers }: Props) {
                                 )}
                             </TableCell>
                         </TableRow>
-                    ))}
+                        );
+                    })}
                     {safeSessions.data.length === 0 && (
                         <TableRow>
-                            <TableCell colSpan={7} className="p-0">
+                            <TableCell colSpan={8} className="p-0">
                                 <EmptyState icon={<Wallet className="size-5" />} title="No sessions yet" hint="Open the first cash session for today." />
                             </TableCell>
                         </TableRow>
                     )}
                 </TableBody>
             </Table>
+            </div>
             {safeSessions.last_page > 1 && (
-            <div className="mt-3 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.05)]">
+            <div className="mt-3 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
                 <Pagination currentPage={safeSessions.current_page} lastPage={safeSessions.last_page} perPage={safeSessions.per_page} total={safeSessions.total} onPageChange={(page) => router.get('/cash-sessions', { page }, { only: ['sessions'], preserveState: true, preserveScroll: true })} showPerPageSelector={false} buildUrl={() => '/cash-sessions'} prefetchOnly={['sessions']} prefetchData={(page) => ({ page })} />
             </div>
             )}
             </Deferred>
 
             <Dialog open={openDlg} onOpenChange={setOpenDlg}>
-                <DialogContent>
+                <DialogContent className="sm:max-w-md">
                     <DialogHeader><DialogTitle>Open cash session</DialogTitle></DialogHeader>
+                    <div className="space-y-4 px-6 py-2">
                     <div>
                         <Label className={labelCls}>Register</Label>
-                        <select value={registerId} onChange={(e) => setRegisterId(Number(e.target.value))} className="mt-1 h-10 w-full rounded-xl border border-slate-200 bg-white px-2 text-sm">
+                        <select value={registerId} onChange={(e) => setRegisterId(Number(e.target.value))} className="mt-1.5 h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
                             {safeRegisters.map((r) => (
                                 <option key={r.id} value={r.id}>{r.name} ({r.code})</option>
                             ))}
@@ -111,11 +132,12 @@ export default function CashSessionsIndex({ sessions, registers }: Props) {
                     </div>
                     <div>
                         <Label className={labelCls}>Opening cash</Label>
-                        <Input value={opening} onChange={(e) => setOpening(e.target.value)} inputMode="decimal" className="mt-1 h-10 rounded-xl tabular-nums" />
+                        <Input value={opening} onChange={(e) => setOpening(e.target.value)} inputMode="decimal" className="mt-1.5 h-10 rounded-xl tabular-nums" />
                     </div>
-                    <DialogFooter>
-                        <Button variant="outline" onClick={() => setOpenDlg(false)} className="rounded-xl">Cancel</Button>
-                        <Button className="rounded-xl bg-blue-600 hover:bg-blue-700" onClick={() => { router.post('/cash-sessions/open', { cash_register_id: registerId, opening_balance: Number(opening) }, { onSuccess: () => setOpenDlg(false) }); }}>
+                    </div>
+                    <DialogFooter className="border-t border-slate-100 px-6 py-4">
+                        <Button variant="outline" onClick={() => setOpenDlg(false)} className="h-10 rounded-xl">Cancel</Button>
+                        <Button className="h-10 rounded-xl bg-blue-600 hover:bg-blue-700" onClick={() => { router.post('/cash-sessions/open', { cash_register_id: registerId, opening_balance: Number(opening) }, { onSuccess: () => setOpenDlg(false) }); }}>
                             Open
                         </Button>
                     </DialogFooter>
@@ -123,15 +145,17 @@ export default function CashSessionsIndex({ sessions, registers }: Props) {
             </Dialog>
 
             <Dialog open={closeId !== null} onOpenChange={(v) => !v && setCloseId(null)}>
-                <DialogContent>
+                <DialogContent className="sm:max-w-md">
                     <DialogHeader><DialogTitle>Close session #{closeId}</DialogTitle></DialogHeader>
+                    <div className="space-y-4 px-6 py-2">
                     <div>
                         <Label className={labelCls}>Closing cash (counted)</Label>
-                        <Input value={closing} onChange={(e) => setClosing(e.target.value)} inputMode="decimal" className="mt-1 h-10 rounded-xl tabular-nums" />
+                        <Input value={closing} onChange={(e) => setClosing(e.target.value)} inputMode="decimal" className="mt-1.5 h-10 rounded-xl tabular-nums" />
                     </div>
-                    <DialogFooter>
-                        <Button variant="outline" onClick={() => setCloseId(null)} className="rounded-xl">Cancel</Button>
-                        <Button className="rounded-xl bg-blue-600 hover:bg-blue-700" onClick={() => { if (closeId) router.post(`/cash-sessions/${closeId}/close`, { closing_balance: Number(closing) }, { onSuccess: () => setCloseId(null) }); }}>
+                    </div>
+                    <DialogFooter className="border-t border-slate-100 px-6 py-4">
+                        <Button variant="outline" onClick={() => setCloseId(null)} className="h-10 rounded-xl">Cancel</Button>
+                        <Button className="h-10 rounded-xl bg-blue-600 hover:bg-blue-700" onClick={() => { if (closeId) router.post(`/cash-sessions/${closeId}/close`, { closing_balance: Number(closing) }, { onSuccess: () => setCloseId(null) }); }}>
                             Close session
                         </Button>
                     </DialogFooter>

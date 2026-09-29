@@ -33,7 +33,7 @@ export default function SuppliersIndex({ suppliers, filters }: { suppliers?: Sup
             <PageHeader
                 title="Suppliers"
                 count={safeSuppliers.data.length}
-                description="Vendor accounts and outstanding balances."
+                description="Vendor ledger — who supplies you and what you still owe."
                 actions={
                     <>
                         <SearchInput value={search} onChange={setSearch} onSubmit={() => router.get('/suppliers', { search }, { preserveState: true })} placeholder="Search name or phone…" />
