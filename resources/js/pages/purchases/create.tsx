@@ -75,7 +75,7 @@ export default function PurchaseCreate({ suppliers, warehouses, products }: Prop
         <AppLayout title="New Purchase">
             <Head title="New Purchase" />
             <PageHeader title="New Purchase" description="Receive stock from a supplier into a warehouse." />
-            <Card className="space-y-4 rounded-2xl border-slate-200 p-5 shadow-sm sm:p-6">
+            <Card className="space-y-4 rounded-2xl border-slate-200 p-5 shadow-[0_1px_2px_rgba(15,23,42,0.05)] sm:p-6">
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div>
                         <label className={labelCls}>Supplier</label>

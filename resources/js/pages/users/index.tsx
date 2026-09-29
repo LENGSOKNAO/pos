@@ -41,7 +41,7 @@ export default function UsersIndex({ users, roles, branches }: { users?: UserRow
                 description="Manage staff accounts, roles and branches."
                 actions={<Button onClick={() => setOpen(true)} className="h-10 rounded-xl bg-blue-600 font-semibold hover:bg-blue-700"><Plus className="size-4" /> New user</Button>}
             />
-            <Card className="overflow-hidden rounded-2xl border-slate-200 p-0 shadow-sm">
+            <Card className="overflow-hidden rounded-2xl border-slate-200 p-0 shadow-[0_1px_2px_rgba(15,23,42,0.05)]">
                 <CardHeader className="border-b border-slate-200 px-5"><CardTitle className="text-sm font-semibold">All users ({safeUsers.length})</CardTitle></CardHeader>
                 <CardContent className="p-0">
                     <table className="w-full text-sm">

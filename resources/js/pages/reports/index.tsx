@@ -75,7 +75,7 @@ export default function ReportsIndex({
             <Head title="Reports" />
             <PageHeader title="Reports" description="Revenue, profit and top products for the selected range." />
 
-            <Card className="rounded-2xl border-slate-200 shadow-sm">
+            <Card className="rounded-2xl border-slate-200 shadow-[0_1px_2px_rgba(15,23,42,0.05)]">
                 <CardContent className="flex flex-wrap items-end gap-3 p-5">
                     <label className={labelCls}>
                         From
@@ -102,7 +102,7 @@ export default function ReportsIndex({
 
             <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 {cards.map((c) => (
-                    <Card key={c.label} className="rounded-2xl border-slate-200 shadow-sm">
+                    <Card key={c.label} className="rounded-2xl border-slate-200 shadow-[0_1px_2px_rgba(15,23,42,0.05)]">
                         <CardHeader className="pb-2"><CardTitle className="text-sm font-semibold text-slate-500">{c.label}</CardTitle></CardHeader>
                         <CardContent>
                             <div className="text-2xl font-extrabold tracking-tight tabular-nums">{c.value}</div>
@@ -113,7 +113,7 @@ export default function ReportsIndex({
             </div>
 
             <div className="mt-4 grid gap-4 lg:grid-cols-2">
-                <Card className="rounded-2xl border-slate-200 shadow-sm">
+                <Card className="rounded-2xl border-slate-200 shadow-[0_1px_2px_rgba(15,23,42,0.05)]">
                     <CardHeader><CardTitle className="text-sm font-semibold">Sales by day</CardTitle></CardHeader>
                     <CardContent className="space-y-2">
                         {safeSalesByDay.length === 0 && <EmptyState icon={<PackageSearch className="size-5" />} title="No sales in range" hint="Pick a wider date range." />}
@@ -128,14 +128,14 @@ export default function ReportsIndex({
                         ))}
                     </CardContent>
                 </Card>
-                <Card className="rounded-2xl border-slate-200 shadow-sm">
+                <Card className="rounded-2xl border-slate-200 shadow-[0_1px_2px_rgba(15,23,42,0.05)]">
                     <CardHeader><CardTitle className="text-sm font-semibold">Top 5 products</CardTitle></CardHeader>
                     <CardContent>
                         <table className="w-full text-sm">
                             <thead><tr className="text-left text-[11px] font-semibold tracking-wider text-slate-500 uppercase"><th className="h-11">Product</th><th className="h-11 text-right">Qty</th><th className="h-11 text-right">Sales</th></tr></thead>
                             <tbody>
                                 {safeTopProducts.map((p) => (
-                                    <tr key={p.sku} className="border-t border-slate-200">
+                                    <tr key={p.sku} className="border-t border-slate-100 transition-colors first:border-0 hover:bg-slate-50">
                                         <td className="h-11 font-semibold">{p.name} <span className="font-mono text-xs font-normal text-slate-500">({p.sku})</span></td>
                                         <td className="h-11 text-right tabular-nums">{Number(p.total_qty).toLocaleString()}</td>
                                         <td className="h-11 text-right font-bold tabular-nums">${Number(p.total_sales).toLocaleString()}</td>

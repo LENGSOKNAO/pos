@@ -24,7 +24,7 @@ export default function SaleShow({ sale }: Props) {
                 <Link href="/sales" className="text-sm font-semibold text-slate-500 hover:text-slate-900">← Back to sales</Link>
                 <Button onClick={() => window.print()} className="h-10 rounded-xl bg-blue-600 font-semibold hover:bg-blue-700">Print receipt</Button>
             </div>
-            <Card id="sale-receipt" className="mx-auto max-w-md rounded-2xl border-slate-200 p-6 font-mono text-sm shadow-sm">
+            <Card id="sale-receipt" className="mx-auto max-w-md rounded-2xl border-slate-200 p-6 font-mono text-sm shadow-[0_1px_2px_rgba(15,23,42,0.05)]">
                 <div className="text-center">
                     <p className="font-sans text-lg font-black tracking-tight">SquarePOS</p>
                     <p className="mt-1 text-xs text-slate-500">{sale.invoice_no} · {sale.created_at}</p>
