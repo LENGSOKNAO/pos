@@ -106,6 +106,10 @@ export default function PosIndex({
   const [showCustomerDialog, setShowCustomerDialog] = useState(false);
   const [showHoldDialog, setShowHoldDialog] = useState(false);
   const [showCartSheet, setShowCartSheet] = useState(false);
+  const [showHeldDialog, setShowHeldDialog] = useState(false);
+  const [heldOrders, setHeldOrders] = useState<any[]>([]);
+  const [heldLoading, setHeldLoading] = useState(false);
+  const [receipt, setReceipt] = useState<any | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [toasts, setToasts] = useState<Array<{ id: string; type: 'success' | 'error' | 'warning' | 'info'; title: string; message?: string }>>([]);
   const barcodeRef = useRef<HTMLInputElement>(null);
@@ -211,7 +215,18 @@ export default function PosIndex({
       });
 
       const payload: any = (response as any)?.data ?? response;
-      addToast('success', 'Sale Complete', `Invoice ${payload?.invoice?.invoice_number ?? ''} created`.trim());
+      const invoice = payload?.invoice;
+      setReceipt({
+        invoice_no: invoice?.invoice_number ?? '',
+        total,
+        paid: amountReceived >= total ? amountReceived : total,
+        change: Math.max(0, (amountReceived >= total ? amountReceived : total) - total),
+        method: paymentMethod?.name ?? '',
+        customer: selectedCustomer?.name ?? 'Walk-in',
+        lines: cart.map((i) => ({ name: i.name, qty: i.quantity, price: i.unit_price })),
+        time: new Date().toLocaleString(),
+      });
+      addToast('success', 'Sale Complete', `Invoice ${invoice?.invoice_number ?? ''} created`.trim());
       clearCart();
       setShowPaymentDialog(false);
       setShowCartSheet(false);
@@ -230,9 +245,77 @@ export default function PosIndex({
     setShowHoldDialog(true);
   };
 
-  const handleResume = async (orderId: string) => {
-    // Implementation for resuming held order
-    addToast('info', 'Resuming Order', 'Loading held order...');
+  const confirmHold = async () => {
+    if (!cashSession?.id) {
+      addToast('error', 'No Cash Session', 'Open a cash session first');
+      return;
+    }
+    setIsProcessing(true);
+    try {
+      await api.holdOrder({
+        cash_session_id: cashSession.id,
+        customer_id: selectedCustomer?.id,
+        items: cart.map((item) => ({
+          product_id: item.product_id,
+          quantity: item.quantity,
+          unit_price: item.unit_price,
+          discount: item.discount,
+          tax: item.tax,
+        })),
+      });
+      addToast('success', 'Order Held', 'Sale has been parked');
+      clearCart();
+      setShowHoldDialog(false);
+      setShowCartSheet(false);
+    } catch (error: any) {
+      addToast('error', 'Hold Failed', error.message);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const openHeld = async () => {
+    setShowHeldDialog(true);
+    setHeldLoading(true);
+    try {
+      const res: any = await api.heldOrders({});
+      const list = res?.data?.data ?? res?.data ?? [];
+      setHeldOrders(Array.isArray(list) ? list : []);
+    } catch (error: any) {
+      addToast('error', 'Load Failed', error.message);
+    } finally {
+      setHeldLoading(false);
+    }
+  };
+
+  const resumeHeld = async (order: any) => {
+    try {
+      await api.resumeOrder(order.id);
+      const lines = (order.items ?? []).map((it: any) => ({
+        id: Math.random().toString(36).substr(2, 9),
+        product_id: it.product_id ?? it.product?.id,
+        name: it.product?.name ?? 'Item',
+        sku: it.product?.sku ?? '',
+        barcode: it.product?.barcode ?? '',
+        unit_price: Number(it.unit_price ?? 0),
+        cost_price: Number(it.cost_price ?? 0),
+        quantity: Number(it.quantity ?? 1),
+        discount: Number(it.discount ?? 0),
+        tax: Number(it.tax ?? 0),
+      }));
+      setCart(lines);
+      if (order.customer) {
+        setSelectedCustomer({
+          id: order.customer.id, name: order.customer.name,
+          customer_code: order.customer.customer_code ?? '', phone: order.customer.phone ?? '',
+          email: order.customer.email ?? '', credit_limit: 0, loyalty_points: 0,
+        });
+      }
+      setShowHeldDialog(false);
+      addToast('success', 'Order Resumed', `${order.order_number ?? ''} loaded to cart`.trim());
+    } catch (error: any) {
+      addToast('error', 'Resume Failed', error.message);
+    }
   };
 
   const matchesFilter = (p: any) => {
@@ -522,7 +605,7 @@ export default function PosIndex({
           </button>
           <button
             type="button"
-            onClick={() => handleResume('')}
+            onClick={openHeld}
             title="Held orders"
             className="relative flex h-10 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 hover:bg-slate-50"
           >
@@ -748,18 +831,72 @@ export default function PosIndex({
         </DialogContent>
       </Dialog>
 
-      {/* Hold dialog */}
+      {/* Hold / held-orders dialog */}
       <Dialog open={showHoldDialog} onOpenChange={setShowHoldDialog}>
         <DialogContent className="max-w-sm rounded-2xl">
           <DialogHeader>
-            <DialogTitle>Hold Current Sale</DialogTitle>
+            <DialogTitle>{cart.length > 0 ? 'Hold Current Sale' : 'Held Orders'}</DialogTitle>
           </DialogHeader>
-          <p className="text-sm text-slate-500">The current cart ({cart.length} items, {formatCurrency(total)}) will be parked so you can serve the next customer.</p>
+          {cart.length > 0 ? (
+            <>
+              <p className="text-sm text-slate-500">The current cart ({cart.length} items, {formatCurrency(total)}) will be parked so you can serve the next customer.</p>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setShowHoldDialog(false)}>Cancel</Button>
+                <Button onClick={confirmHold} disabled={isProcessing} className="bg-blue-600 text-white hover:bg-blue-700">
+                  {isProcessing ? <Loader2 className="size-4 animate-spin mr-2" /> : null} Hold Sale
+                </Button>
+              </DialogFooter>
+            </>
+          ) : (
+            <>
+              <div className="max-h-64 space-y-1 overflow-y-auto">
+                {heldLoading && <p className="py-4 text-center text-sm text-slate-500">Loading…</p>}
+                {!heldLoading && heldOrders.length === 0 && <p className="py-4 text-center text-sm text-slate-500">No held orders.</p>}
+                {heldOrders.map((o: any) => (
+                  <div key={o.id} className="flex items-center gap-2 rounded-lg px-3 py-2 hover:bg-slate-100">
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold">{o.order_number}</p>
+                      <p className="text-xs text-slate-500 tabular-nums">{o.items?.length ?? 0} items · {formatCurrency(Number(o.total ?? 0))}</p>
+                    </div>
+                    <Button size="sm" onClick={() => resumeHeld(o)} className="h-8 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Resume</Button>
+                  </div>
+                ))}
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setShowHoldDialog(false)}>Close</Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Receipt dialog */}
+      <Dialog open={receipt !== null} onOpenChange={(v) => { if (!v) setReceipt(null); }}>
+        <DialogContent className="max-w-sm rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2"><Check className="size-5 text-emerald-600" /> Sale Complete</DialogTitle>
+          </DialogHeader>
+          {receipt && (
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between"><span className="text-slate-500">Invoice</span><span className="font-mono font-bold">{receipt.invoice_no}</span></div>
+              <div className="flex justify-between"><span className="text-slate-500">Customer</span><span className="font-medium">{receipt.customer}</span></div>
+              <div className="max-h-40 space-y-1 overflow-y-auto border-y border-slate-100 py-2">
+                {receipt.lines.map((l: any, i: number) => (
+                  <div key={i} className="flex justify-between gap-2">
+                    <span className="min-w-0 flex-1 truncate">{l.name} × {l.qty}</span>
+                    <span className="font-semibold tabular-nums">{formatCurrency(l.qty * l.price)}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="flex justify-between text-base font-extrabold"><span>Total</span><span className="tabular-nums">{formatCurrency(receipt.total)}</span></div>
+              <div className="flex justify-between"><span className="text-slate-500">Paid ({receipt.method})</span><span className="font-medium tabular-nums">{formatCurrency(receipt.paid)}</span></div>
+              <div className="flex justify-between"><span className="text-slate-500">Change</span><span className="font-medium tabular-nums">{formatCurrency(receipt.change)}</span></div>
+              <p className="text-xs text-slate-400">{receipt.time}</p>
+            </div>
+          )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowHoldDialog(false)}>Cancel</Button>
-            <Button onClick={() => { setShowHoldDialog(false); addToast('info', 'Order Held', 'Sale has been parked'); }} className="bg-blue-600 text-white hover:bg-blue-700">
-              Hold Sale
-            </Button>
+            <Button variant="outline" onClick={() => setReceipt(null)}>New Sale</Button>
+            <Button onClick={() => window.print()} className="bg-blue-600 text-white hover:bg-blue-700"><Receipt className="size-4 mr-2" /> Print</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
