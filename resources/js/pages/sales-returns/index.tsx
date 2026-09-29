@@ -8,13 +8,16 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { EmptyState, PageHeader, TableHeadRow, TableShell, tdCls, thCls } from '@/components/admin';
+import { Pagination } from '@/components/ui/pagination';
 
 interface Ret { id: number; return_no: string; sale?: string | null; status: string; total: number; created_at?: string }
 
 const labelCls = 'text-[11px] font-semibold tracking-wider text-slate-500 uppercase';
 
-export default function ReturnsIndex({ returns, sales }: { returns?: { data: Ret[] }; sales?: { id: number; invoice_no: string }[] }) {
-    const safeReturns = returns ?? { data: [] as Ret[] };
+interface ReturnsPaginator { data: Ret[]; current_page: number; last_page: number; per_page: number; total: number }
+
+export default function ReturnsIndex({ returns, sales }: { returns?: ReturnsPaginator; sales?: { id: number; invoice_no: string }[] }) {
+    const safeReturns = returns ?? { data: [] as Ret[], current_page: 1, last_page: 1, per_page: 15, total: 0 };
     const safeSales = Array.isArray(sales) ? sales : [];
     const [open, setOpen] = useState(false);
     const [saleId, setSaleId] = useState<number>(safeSales[0]?.id ?? 0);
@@ -65,6 +68,9 @@ export default function ReturnsIndex({ returns, sales }: { returns?: { data: Ret
                     )}
                 </tbody>
             </TableShell>
+            <div className="mt-3 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.05)]">
+                <Pagination currentPage={safeReturns.current_page} lastPage={safeReturns.last_page} perPage={safeReturns.per_page} total={safeReturns.total} onPageChange={(page) => router.get('/sales-returns', { page }, { preserveState: true, preserveScroll: true })} showPerPageSelector={false} />
+            </div>
             <Dialog open={open} onOpenChange={setOpen}>
                 <DialogContent>
                     <DialogHeader><DialogTitle>New sales return</DialogTitle></DialogHeader>

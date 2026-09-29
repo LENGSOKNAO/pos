@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { EmptyState, PageHeader } from '@/components/admin';
+import { Pagination } from '@/components/ui/pagination';
 
 interface Session {
     id: number;
@@ -22,14 +23,14 @@ interface Session {
 }
 
 interface Props {
-    sessions: { data: Session[]; total: number };
+    sessions: { data: Session[]; current_page: number; last_page: number; per_page: number; total: number };
     registers: { id: number; name: string; code: string }[];
 }
 
 const labelCls = 'text-[11px] font-semibold tracking-wider text-slate-500 uppercase';
 
 export default function CashSessionsIndex({ sessions, registers }: Props) {
-    const safeSessions = sessions ?? { data: [] as Session[], total: 0 };
+    const safeSessions = sessions ?? { data: [] as Session[], current_page: 1, last_page: 1, per_page: 15, total: 0 };
     const safeRegisters = Array.isArray(registers) ? registers : [];
     const [openDlg, setOpenDlg] = useState(false);
     const [registerId, setRegisterId] = useState(safeRegisters[0]?.id ?? 0);
@@ -89,6 +90,9 @@ export default function CashSessionsIndex({ sessions, registers }: Props) {
                     )}
                 </TableBody>
             </Table>
+            <div className="mt-3 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.05)]">
+                <Pagination currentPage={safeSessions.current_page} lastPage={safeSessions.last_page} perPage={safeSessions.per_page} total={safeSessions.total} onPageChange={(page) => router.get('/cash-sessions', { page }, { preserveState: true, preserveScroll: true })} showPerPageSelector={false} />
+            </div>
 
             <Dialog open={openDlg} onOpenChange={setOpenDlg}>
                 <DialogContent>

@@ -7,15 +7,22 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { EmptyState, PageHeader, SearchInput, TableHeadRow, TableShell, tdCls, thCls } from '@/components/admin';
+import { Pagination } from '@/components/ui/pagination';
 
 interface Supplier { id: number; name: string; code: string; phone?: string | null; balance: number; status: string }
 
-export default function SuppliersIndex({ suppliers, filters }: { suppliers?: { data: Supplier[] }; filters?: { search: string } }) {
-    const safeSuppliers = suppliers ?? { data: [] as Supplier[] };
+interface SuppliersPaginator { data: Supplier[]; current_page: number; last_page: number; per_page: number; total: number }
+
+export default function SuppliersIndex({ suppliers, filters }: { suppliers?: SuppliersPaginator; filters?: { search: string } }) {
+    const safeSuppliers = suppliers ?? { data: [] as Supplier[], current_page: 1, last_page: 1, per_page: 15, total: 0 };
     const [search, setSearch] = useState(filters?.search ?? '');
     const [open, setOpen] = useState(false);
     const [name, setName] = useState('');
     const [phone, setPhone] = useState('');
+
+    function goToPage(page: number) {
+        router.get('/suppliers', { search: search || undefined, page }, { preserveState: true, preserveScroll: true });
+    }
 
     return (
         <AppLayout title="Suppliers">
@@ -58,6 +65,9 @@ export default function SuppliersIndex({ suppliers, filters }: { suppliers?: { d
                     )}
                 </tbody>
             </TableShell>
+            <div className="mt-3 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.05)]">
+                <Pagination currentPage={safeSuppliers.current_page} lastPage={safeSuppliers.last_page} perPage={safeSuppliers.per_page} total={safeSuppliers.total} onPageChange={goToPage} showPerPageSelector={false} />
+            </div>
             <Dialog open={open} onOpenChange={setOpen}>
                 <DialogContent>
                     <DialogHeader><DialogTitle>Quick-add supplier</DialogTitle></DialogHeader>

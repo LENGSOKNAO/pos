@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { EmptyState, PageHeader, SearchInput } from '@/components/admin';
+import { Pagination } from '@/components/ui/pagination';
 
 interface Order {
     id: number;
@@ -18,7 +19,7 @@ interface Order {
 }
 
 interface Props {
-    orders: { data: Order[]; current_page: number; last_page: number; total: number };
+    orders: { data: Order[]; current_page: number; last_page: number; per_page: number; total: number };
     filters: { search: string };
 }
 
@@ -29,8 +30,11 @@ function statusBadge(status: string) {
 }
 
 export default function PurchasesIndex({ orders, filters }: Props) {
-    const safeOrders = orders ?? { data: [] as Order[], current_page: 1, last_page: 1, total: 0 };
+    const safeOrders = orders ?? { data: [] as Order[], current_page: 1, last_page: 1, per_page: 15, total: 0 };
     const [search, setSearch] = useState(filters?.search ?? '');
+    function goToPage(page: number) {
+        router.get('/purchases', { search: search || undefined, page }, { preserveState: true, preserveScroll: true });
+    }
     return (
         <AppLayout title="Purchases">
             <Head title="Purchases" />
@@ -76,9 +80,9 @@ export default function PurchasesIndex({ orders, filters }: Props) {
                     )}
                 </TableBody>
             </Table>
-            {orders.last_page > 1 && (
-                <p className="mt-3 text-center text-xs text-slate-500 tabular-nums">Page {orders.current_page} of {orders.last_page} · {safeOrders.total} records</p>
-            )}
+            <div className="mt-3 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.05)]">
+                <Pagination currentPage={safeOrders.current_page} lastPage={safeOrders.last_page} perPage={safeOrders.per_page} total={safeOrders.total} onPageChange={goToPage} showPerPageSelector={false} />
+            </div>
         </AppLayout>
     );
 }

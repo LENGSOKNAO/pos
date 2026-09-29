@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { EmptyState, PageHeader, TableHeadRow, TableShell, tdCls, thCls } from '@/components/admin';
+import { Pagination } from '@/components/ui/pagination';
 
 interface Sale {
     id: number;
@@ -19,14 +20,26 @@ interface Sale {
     created_at?: string;
 }
 
-export default function SalesIndex({ sales, filters }: { sales?: { data: Sale[]; current_page: number; last_page: number }; filters?: { status?: string; from?: string; to?: string } }) {
-    const safeSales = sales ?? { data: [] as Sale[], current_page: 1, last_page: 1 };
+interface SalesPaginator {
+    data: Sale[];
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+}
+
+export default function SalesIndex({ sales, filters }: { sales?: SalesPaginator; filters?: { status?: string; from?: string; to?: string } }) {
+    const safeSales = sales ?? { data: [] as Sale[], current_page: 1, last_page: 1, per_page: 15, total: 0 };
     const [status, setStatus] = useState(filters?.status ?? '');
     const [from, setFrom] = useState(filters?.from ?? '');
     const [to, setTo] = useState(filters?.to ?? '');
 
     function apply() {
         router.get('/sales', { status: status || undefined, from: from || undefined, to: to || undefined }, { preserveState: true });
+    }
+
+    function goToPage(page: number) {
+        router.get('/sales', { status: status || undefined, from: from || undefined, to: to || undefined, page }, { preserveState: true, preserveScroll: true });
     }
 
     return (
@@ -82,9 +95,9 @@ export default function SalesIndex({ sales, filters }: { sales?: { data: Sale[];
                     )}
                 </tbody>
             </TableShell>
-            {sales.last_page > 1 && (
-                <p className="mt-3 text-center text-xs text-slate-500 tabular-nums">Page {sales.current_page} of {sales.last_page}</p>
-            )}
+            <div className="mt-3 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.05)]">
+                <Pagination currentPage={safeSales.current_page} lastPage={safeSales.last_page} perPage={safeSales.per_page} total={safeSales.total} onPageChange={goToPage} showPerPageSelector={false} />
+            </div>
         </AppLayout>
     );
 }
