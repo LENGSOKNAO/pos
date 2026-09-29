@@ -94,6 +94,7 @@ class PosController extends BaseApiController
             $employee = auth()->user()->employee;
             $user = auth()->user();
             $warehouseId = $employee->branch?->warehouses()->first()?->id;
+            $customerId = $data['customer_id'] ?? null;
 
             // Calculate totals using server-side prices unless override is permitted + audited
             $subtotal = 0;
@@ -128,7 +129,7 @@ class PosController extends BaseApiController
 
             $paidSum = collect($data['payments'])->sum(fn ($p) => (float) $p['amount']);
             $hasCredit = collect($data['payments'])->contains(fn ($p) => PaymentMethod::find($p['payment_method_id'])?->code === 'credit');
-            if ($paidSum < $total && ! $hasCredit && empty($data['customer_id'])) {
+            if ($paidSum < $total && ! $hasCredit && empty($customerId)) {
                 throw new \DomainException('Payment insufficient: received '.$paidSum.' of '.$total.'.');
             }
             $invoiceStatus = $paidSum >= $total ? 'paid' : ($paidSum > 0 ? 'partial' : 'unpaid');
@@ -137,7 +138,7 @@ class PosController extends BaseApiController
             $salesOrder = SalesOrder::create([
                 'company_id' => $employee->company_id,
                 'branch_id' => $employee->branch_id,
-                'customer_id' => $data['customer_id'],
+                'customer_id' => $customerId,
                 'employee_id' => $employee->id,
                 'order_number' => 'SO-'.now()->format('YmdHis').'-'.rand(1000, 9999),
                 'order_type' => 'pos',
@@ -198,7 +199,7 @@ class PosController extends BaseApiController
             // Create invoice
             $invoice = Invoice::create([
                 'branch_id' => $employee->branch_id,
-                'customer_id' => $data['customer_id'],
+                'customer_id' => $customerId,
                 'sales_order_id' => $salesOrder->id,
                 'invoice_number' => 'INV-'.now()->format('YmdHis').'-'.rand(1000, 9999),
                 'subtotal' => $subtotal,
@@ -229,7 +230,7 @@ class PosController extends BaseApiController
             foreach ($data['payments'] as $paymentData) {
                 $payment = Payment::create([
                     'company_id' => $employee->company_id,
-                    'customer_id' => $data['customer_id'],
+                    'customer_id' => $customerId,
                     'invoice_id' => $invoice->id,
                     'payment_method_id' => $paymentData['payment_method_id'],
                     'amount' => $paymentData['amount'],
@@ -252,8 +253,8 @@ class PosController extends BaseApiController
             }
 
             // Update customer loyalty points
-            if ($data['customer_id']) {
-                $customer = Customer::find($data['customer_id']);
+            if ($customerId) {
+                $customer = Customer::find($customerId);
                 $pointsEarned = floor($total / 10); // 1 point per $10
                 if ($pointsEarned > 0) {
                     $customer->increment('loyalty_points', $pointsEarned);
@@ -314,7 +315,7 @@ class PosController extends BaseApiController
             $salesOrder = SalesOrder::create([
                 'company_id' => $employee->company_id,
                 'branch_id' => $employee->branch_id,
-                'customer_id' => $data['customer_id'],
+                'customer_id' => $customerId,
                 'employee_id' => $employee->id,
                 'order_number' => 'HOLD-'.now()->format('YmdHis').'-'.rand(1000, 9999),
                 'order_type' => 'pos',

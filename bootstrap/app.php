@@ -23,7 +23,7 @@ if (($_SERVER['VERCEL'] ?? getenv('VERCEL')) === '1') {
         'APP_ENV' => 'production',
         'APP_MAINTENANCE_DRIVER' => 'file',
         'LOG_CHANNEL' => 'stderr',
-        'SESSION_DRIVER' => 'database',
+        'SESSION_DRIVER' => 'cookie',
         'CACHE_STORE' => 'array',
         'QUEUE_CONNECTION' => 'sync',
         'VIEW_COMPILED_PATH' => '/tmp',

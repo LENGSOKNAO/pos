@@ -86,11 +86,14 @@ Route::prefix('v1')->name('api.')->group(function () {
         ]);
     })->name('health');
 
-    // Auth routes (outside auth:sanctum to avoid CSRF issues)
-    Route::post('/auth/login', [AuthController::class, 'login']);
-    Route::post('/auth/logout', [AuthController::class, 'logout']);
-    Route::get('/auth/me', [AuthController::class, 'me']);
-    Route::post('/auth/refresh', [AuthController::class, 'refresh']);
+    // Auth routes need the session (login writes it) but must stay
+    // outside `auth` so logged-out users can reach them.
+    Route::middleware(['web'])->group(function () {
+        Route::post('/auth/login', [AuthController::class, 'login']);
+        Route::post('/auth/logout', [AuthController::class, 'logout']);
+        Route::get('/auth/me', [AuthController::class, 'me']);
+        Route::post('/auth/refresh', [AuthController::class, 'refresh']);
+    });
 
     Route::middleware(['web', 'auth'])->group(function () {
         // Companies
