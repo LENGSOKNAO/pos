@@ -207,7 +207,7 @@ export default function CustomersIndex({
         ]}
         data={safeCustomers.data}
         keyAccessor={item => item.id}
-        pagination={{ currentPage: safeCustomers.current_page, lastPage: safeCustomers.last_page, perPage: safeCustomers.per_page, total: safeCustomers.total, onPageChange: page => router.get(`/customers?page=${page}`, {}, { only: ['customers'], preserveState: true, preserveScroll: true }) }}
+        pagination={{ currentPage: safeCustomers.current_page, lastPage: safeCustomers.last_page, perPage: safeCustomers.per_page, total: safeCustomers.total, onPageChange: page => router.get('/customers', { page }, { only: ['customers'], preserveState: true, preserveScroll: true }), buildUrl: () => '/customers', prefetchOnly: ['customers'], prefetchData: (page) => ({ page }) }}
       />
     </AppLayout>
   );

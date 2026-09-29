@@ -530,7 +530,10 @@ export default function ProductsIndex({
           lastPage: safeProducts.last_page ?? 1,
           perPage: safeProducts.per_page ?? 15,
           total: safeProducts.total ?? 0,
-          onPageChange: (page) => router.get(`/products?page=${page}`, {}, { only: ['products'], preserveState: true, preserveScroll: true }),
+          onPageChange: (page) => router.get('/products', { page }, { only: ['products'], preserveState: true, preserveScroll: true }),
+          buildUrl: () => '/products',
+          prefetchOnly: ['products'],
+          prefetchData: (page) => ({ page }),
         }}
         sortBy={safeProducts.sort_by}
         sortOrder={safeProducts.sort_order}

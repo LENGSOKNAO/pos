@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { router } from '@inertiajs/react';
 import { cn } from '@/lib/utils';
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 
@@ -10,6 +11,9 @@ export interface PaginationProps {
   onPageChange: (page: number) => void;
   showPerPageSelector?: boolean;
   perPageOptions?: number[];
+  buildUrl?: (page: number) => string;
+  prefetchOnly?: string[];
+  prefetchData?: (page: number) => Record<string, unknown>;
 }
 
 export function Pagination({
@@ -20,7 +24,25 @@ export function Pagination({
   onPageChange,
   showPerPageSelector = true,
   perPageOptions = [10, 15, 25, 50, 100],
+  buildUrl,
+  prefetchOnly,
+  prefetchData,
 }: PaginationProps) {
+  // Preload neighboring pages so clicking them shows instantly without
+  // waiting on the database. Same `only` + params as the click handler,
+  // so the cached response is reused on click.
+  React.useEffect(() => {
+    if (!buildUrl) return;
+    for (const page of new Set([currentPage - 1, currentPage + 1])) {
+      if (page < 1 || page > lastPage || page === currentPage) continue;
+      try {
+        router.prefetch(buildUrl(page), { only: prefetchOnly, data: prefetchData?.(page) });
+      } catch {
+        // Prefetch is best-effort; clicks still work without it.
+      }
+    }
+  }, [buildUrl, currentPage, lastPage, prefetchOnly, prefetchData]);
+
   if (lastPage <= 1) return null;
 
   const pages = React.useMemo(() => {

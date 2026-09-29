@@ -38,8 +38,12 @@ export default function SalesIndex({ sales, filters }: { sales?: SalesPaginator;
         router.get('/sales', { status: status || undefined, from: from || undefined, to: to || undefined }, { preserveState: true });
     }
 
+    function pageParams(page?: number) {
+        return { status: status || undefined, from: from || undefined, to: to || undefined, page };
+    }
+
     function goToPage(page: number) {
-        router.get('/sales', { status: status || undefined, from: from || undefined, to: to || undefined, page }, { only: ['sales'], preserveState: true, preserveScroll: true });
+        router.get('/sales', pageParams(page), { only: ['sales'], preserveState: true, preserveScroll: true });
     }
 
     return (
@@ -97,7 +101,7 @@ export default function SalesIndex({ sales, filters }: { sales?: SalesPaginator;
             </TableShell>
             {safeSales.last_page > 1 && (
             <div className="mt-3 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.05)]">
-                <Pagination currentPage={safeSales.current_page} lastPage={safeSales.last_page} perPage={safeSales.per_page} total={safeSales.total} onPageChange={goToPage} showPerPageSelector={false} />
+                <Pagination currentPage={safeSales.current_page} lastPage={safeSales.last_page} perPage={safeSales.per_page} total={safeSales.total} onPageChange={goToPage} showPerPageSelector={false} buildUrl={() => '/sales'} prefetchOnly={['sales']} prefetchData={(page) => pageParams(page)} />
             </div>
             )}
         </AppLayout>

@@ -70,7 +70,7 @@ export default function ReturnsIndex({ returns, sales }: { returns?: ReturnsPagi
             </TableShell>
             {safeReturns.last_page > 1 && (
             <div className="mt-3 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.05)]">
-                <Pagination currentPage={safeReturns.current_page} lastPage={safeReturns.last_page} perPage={safeReturns.per_page} total={safeReturns.total} onPageChange={(page) => router.get('/sales-returns', { page }, { only: ['returns'], preserveState: true, preserveScroll: true })} showPerPageSelector={false} />
+                <Pagination currentPage={safeReturns.current_page} lastPage={safeReturns.last_page} perPage={safeReturns.per_page} total={safeReturns.total} onPageChange={(page) => router.get('/sales-returns', { page }, { only: ['returns'], preserveState: true, preserveScroll: true })} showPerPageSelector={false} buildUrl={() => '/sales-returns'} prefetchOnly={['returns']} prefetchData={(page) => ({ page })} />
             </div>
             )}
             <Dialog open={open} onOpenChange={setOpen}>

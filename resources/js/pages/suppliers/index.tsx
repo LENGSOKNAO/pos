@@ -20,8 +20,11 @@ export default function SuppliersIndex({ suppliers, filters }: { suppliers?: Sup
     const [name, setName] = useState('');
     const [phone, setPhone] = useState('');
 
+    function pageParams(page?: number) {
+        return { search: search || undefined, page };
+    }
     function goToPage(page: number) {
-        router.get('/suppliers', { search: search || undefined, page }, { only: ['suppliers'], preserveState: true, preserveScroll: true });
+        router.get('/suppliers', pageParams(page), { only: ['suppliers'], preserveState: true, preserveScroll: true });
     }
 
     return (
@@ -67,7 +70,7 @@ export default function SuppliersIndex({ suppliers, filters }: { suppliers?: Sup
             </TableShell>
             {safeSuppliers.last_page > 1 && (
             <div className="mt-3 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.05)]">
-                <Pagination currentPage={safeSuppliers.current_page} lastPage={safeSuppliers.last_page} perPage={safeSuppliers.per_page} total={safeSuppliers.total} onPageChange={goToPage} showPerPageSelector={false} />
+                <Pagination currentPage={safeSuppliers.current_page} lastPage={safeSuppliers.last_page} perPage={safeSuppliers.per_page} total={safeSuppliers.total} onPageChange={goToPage} showPerPageSelector={false} buildUrl={() => '/suppliers'} prefetchOnly={['suppliers']} prefetchData={(page) => pageParams(page)} />
             </div>
             )}
             <Dialog open={open} onOpenChange={setOpen}>
