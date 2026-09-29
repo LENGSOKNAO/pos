@@ -16,6 +16,8 @@ class LoyaltyTransaction extends Model
 
     public $incrementing = false;
 
+    public $timestamps = false;
+
     protected $fillable = [
         'id',
         'customer_id',

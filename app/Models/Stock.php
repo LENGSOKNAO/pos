@@ -16,6 +16,8 @@ class Stock extends Model
 
     public $incrementing = false;
 
+    public $timestamps = false;
+
     protected $fillable = [
         'id',
         'product_id',

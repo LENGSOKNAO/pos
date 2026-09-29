@@ -12,7 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('purchase_receipts', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
+            $table->foreignUuid('purchase_order_id')->constrained('purchase_orders')->cascadeOnDelete();
+            $table->foreignUuid('warehouse_id')->constrained('warehouses')->cascadeOnDelete();
+            $table->string('receipt_number')->unique();
+            $table->foreignUuid('received_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->timestamp('received_at')->nullable();
+            $table->string('status')->default('completed');
             $table->timestamps();
         });
     }
