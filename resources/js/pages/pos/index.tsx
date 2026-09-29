@@ -350,7 +350,7 @@ export default function PosIndex({
                       </div>
                       <span className="mt-1.5 line-clamp-2 min-h-10 text-sm leading-snug font-semibold text-slate-900">{product.name}</span>
                       <span className="mt-auto flex w-full items-baseline justify-between gap-2 pt-2">
-                        <span className="text-base font-bold text-slate-900 tabular-nums">
+                        <span className="text-xl font-black text-slate-900 tabular-nums">
                           ${Number(product.selling_price).toFixed(2)}
                         </span>
                         <span className="text-xs text-slate-400">
@@ -447,6 +447,10 @@ export default function PosIndex({
 
             {/* Summary */}
             <div className="shrink-0 border-t border-slate-200 bg-white p-4">
+              <div className="mb-2 flex items-end justify-between rounded-xl bg-slate-900 px-4 py-3 text-white">
+                <span className="text-xs font-bold tracking-wider uppercase opacity-70">Total due</span>
+                <span className="text-3xl font-black tracking-tight tabular-nums">{formatCurrency(total)}</span>
+              </div>
               <dl className="space-y-1.5 text-sm">
                 <div className="flex justify-between">
                   <dt className="text-slate-500">Subtotal</dt>
@@ -499,32 +503,76 @@ export default function PosIndex({
                 </div>
               )}
 
-              {/* Payment row */}
-              <div className="mt-3 grid grid-cols-2 gap-2">
-                <Select
-                  value={paymentMethod?.id || ''}
-                  onChange={(e) => {
-                    const method = safePaymentMethods.find(p => p.id === e.target.value);
-                    setPaymentMethod(method || null);
-                  }}
-                  className="h-10"
-                  aria-label="Payment method"
-                >
-                  {safePaymentMethods.map(p => (
-                    <option key={p.id} value={p.id}>
-                      {p.name} ({p.type})
-                    </option>
+              {/* Tender: payment method quick keys */}
+              <div className="mt-3">
+                <p className="mb-1.5 text-[11px] font-bold tracking-wider text-slate-400 uppercase">Tender</p>
+                <div className="grid grid-cols-4 gap-1.5">
+                  {safePaymentMethods.slice(0, 4).map((p) => (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => setPaymentMethod(p)}
+                      className={cn(
+                        'rounded-lg border px-1 py-2 text-xs font-bold transition-colors',
+                        paymentMethod?.id === p.id
+                          ? 'border-blue-600 bg-blue-600 text-white'
+                          : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50',
+                      )}
+                    >
+                      {p.name}
+                    </button>
                   ))}
-                </Select>
-                <Input
-                  type="number"
-                  step="0.01"
-                  value={amountReceived}
-                  onChange={(e) => setAmountReceived(parseFloat(e.target.value) || 0)}
-                  placeholder={formatCurrency(total)}
-                  className="h-10 font-semibold tabular-nums"
-                  aria-label="Amount received"
-                />
+                </div>
+              </div>
+              {/* Amount row */}
+              <div className="mt-2 space-y-2">
+                <div className="flex gap-2">
+                  {safePaymentMethods.length > 4 && (
+                    <Select
+                      value={paymentMethod?.id || ''}
+                      onChange={(e) => {
+                        const method = safePaymentMethods.find((m) => m.id === e.target.value);
+                        setPaymentMethod(method || null);
+                      }}
+                      className="h-10 w-32 shrink-0"
+                      aria-label="Payment method"
+                    >
+                      {safePaymentMethods.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.name} ({p.type})
+                        </option>
+                      ))}
+                    </Select>
+                  )}
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={amountReceived}
+                    onChange={(e) => setAmountReceived(parseFloat(e.target.value) || 0)}
+                    placeholder={formatCurrency(total)}
+                    className="h-11 flex-1 text-base font-bold tabular-nums"
+                    aria-label="Amount received"
+                  />
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {[
+                    { label: 'Exact', value: total },
+                    { label: '5', value: 5 },
+                    { label: '10', value: 10 },
+                    { label: '20', value: 20 },
+                    { label: '50', value: 50 },
+                    { label: '100', value: 100 },
+                  ].map((d) => (
+                    <button
+                      key={d.label}
+                      type="button"
+                      onClick={() => setAmountReceived(Number(d.value.toFixed(2)))}
+                      className="rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-xs font-bold text-slate-600 tabular-nums hover:bg-slate-100"
+                    >
+                      {d.label === 'Exact' ? 'Exact' : `$${d.label}`}
+                    </button>
+                  ))}
+                </div>
               </div>
               <div className="mt-1.5 flex justify-between text-xs">
                 <span className={change >= 0 ? 'font-medium text-emerald-700' : 'font-medium text-red-600'}>
