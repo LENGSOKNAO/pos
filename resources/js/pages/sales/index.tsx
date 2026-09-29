@@ -39,7 +39,7 @@ export default function SalesIndex({ sales, filters }: { sales?: SalesPaginator;
     }
 
     function goToPage(page: number) {
-        router.get('/sales', { status: status || undefined, from: from || undefined, to: to || undefined, page }, { preserveState: true, preserveScroll: true });
+        router.get('/sales', { status: status || undefined, from: from || undefined, to: to || undefined, page }, { only: ['sales'], preserveState: true, preserveScroll: true });
     }
 
     return (
@@ -95,9 +95,11 @@ export default function SalesIndex({ sales, filters }: { sales?: SalesPaginator;
                     )}
                 </tbody>
             </TableShell>
+            {safeSales.last_page > 1 && (
             <div className="mt-3 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.05)]">
                 <Pagination currentPage={safeSales.current_page} lastPage={safeSales.last_page} perPage={safeSales.per_page} total={safeSales.total} onPageChange={goToPage} showPerPageSelector={false} />
             </div>
+            )}
         </AppLayout>
     );
 }

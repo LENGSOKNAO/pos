@@ -90,9 +90,11 @@ export default function CashSessionsIndex({ sessions, registers }: Props) {
                     )}
                 </TableBody>
             </Table>
+            {safeSessions.last_page > 1 && (
             <div className="mt-3 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.05)]">
-                <Pagination currentPage={safeSessions.current_page} lastPage={safeSessions.last_page} perPage={safeSessions.per_page} total={safeSessions.total} onPageChange={(page) => router.get('/cash-sessions', { page }, { preserveState: true, preserveScroll: true })} showPerPageSelector={false} />
+                <Pagination currentPage={safeSessions.current_page} lastPage={safeSessions.last_page} perPage={safeSessions.per_page} total={safeSessions.total} onPageChange={(page) => router.get('/cash-sessions', { page }, { only: ['sessions'], preserveState: true, preserveScroll: true })} showPerPageSelector={false} />
             </div>
+            )}
 
             <Dialog open={openDlg} onOpenChange={setOpenDlg}>
                 <DialogContent>
