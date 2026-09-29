@@ -76,7 +76,7 @@ export default function ReportsIndex({
                 title="Reports"
                 description="Revenue, profit and top products for the selected range."
                 actions={
-                    <Button onClick={apply} className="h-10 rounded-xl bg-slate-900 font-semibold text-white hover:bg-slate-800">
+                    <Button onClick={apply} className="h-10 rounded-xl bg-blue-600 font-semibold text-white hover:bg-blue-700">
                         <CalendarDays className="size-4" /> Apply filters
                     </Button>
                 }
@@ -103,7 +103,7 @@ export default function ReportsIndex({
                             </select>
                         </label>
                     )}
-                    <button onClick={apply} className="h-10 rounded-xl bg-slate-900 px-5 text-sm font-semibold text-white hover:bg-slate-800">Apply</button>
+                    <button onClick={apply} className="h-10 rounded-xl bg-blue-600 px-5 text-sm font-semibold text-white hover:bg-blue-700">Apply</button>
                 </CardContent>
             </Card>
 

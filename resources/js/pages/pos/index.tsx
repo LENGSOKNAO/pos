@@ -262,7 +262,7 @@ export default function PosIndex({
         </div>
       </div>
 
-      <div className="flex h-full flex-col bg-slate-100 lg:flex-row">
+      <div className="flex min-h-0 flex-1 flex-col bg-slate-100 lg:flex-row">
         {/* Left Panel - Products */}
         <div className="flex min-h-0 w-full flex-1 flex-col bg-white lg:border-r lg:border-slate-200">
           {/* Search + category pills */}
@@ -307,15 +307,6 @@ export default function PosIndex({
                   {c.name}
                 </button>
               ))}
-              <Select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="ml-auto hidden w-44 shrink-0 lg:block"
-                aria-label="Category filter"
-              >
-                <option value="">All Categories</option>
-                {safeCategories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-              </Select>
             </div>
           </div>
 
@@ -547,7 +538,7 @@ export default function PosIndex({
               <Button
                 onClick={handleCheckout}
                 disabled={cart.length === 0 || isProcessing || amountReceived < total}
-                className="mt-3 h-13 w-full rounded-xl bg-slate-900 py-3.5 text-base font-semibold text-white hover:bg-slate-800 disabled:opacity-40"
+                className="mt-3 h-13 w-full rounded-xl bg-blue-600 py-3.5 text-base font-semibold text-white hover:bg-blue-700 disabled:opacity-40"
               >
                 {isProcessing ? (
                   <>
@@ -576,7 +567,7 @@ export default function PosIndex({
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowPaymentDialog(false)}>Cancel</Button>
-            <Button onClick={handleCheckout} disabled={isProcessing} className="bg-slate-900 text-white hover:bg-slate-800">
+            <Button onClick={handleCheckout} disabled={isProcessing} className="bg-blue-600 text-white hover:bg-blue-700">
               {isProcessing ? <Loader2 className="size-4 animate-spin mr-2" /> : null} Confirm
             </Button>
           </DialogFooter>
@@ -619,7 +610,7 @@ export default function PosIndex({
           <p className="text-sm text-slate-500">The current cart ({cart.length} items, {formatCurrency(total)}) will be parked so you can serve the next customer.</p>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowHoldDialog(false)}>Cancel</Button>
-            <Button onClick={() => { setShowHoldDialog(false); addToast('info', 'Order Held', 'Sale has been parked'); }} className="bg-slate-900 text-white hover:bg-slate-800">
+            <Button onClick={() => { setShowHoldDialog(false); addToast('info', 'Order Held', 'Sale has been parked'); }} className="bg-blue-600 text-white hover:bg-blue-700">
               Hold Sale
             </Button>
           </DialogFooter>

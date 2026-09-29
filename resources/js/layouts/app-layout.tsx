@@ -48,7 +48,7 @@ export default function AppLayout({
 }: AppLayoutProps) {
     const [mobileOpen, setMobileOpen] = useState(false);
     if (fullscreen) {
-        return <div className="min-h-screen bg-slate-100">{children}</div>;
+        return <div className="flex h-screen flex-col bg-slate-100">{children}</div>;
     }
     return <Shell title={title} mobileOpen={mobileOpen} setMobileOpen={setMobileOpen}>{children}</Shell>;
 }

@@ -82,7 +82,7 @@ export default function Dashboard({ stats: rawStats }: { stats?: Stats }) {
                 actions={
                     <>
                         <Link href="/pos">
-                            <Button className="h-10 rounded-xl bg-slate-900 font-semibold text-white hover:bg-slate-800">
+                            <Button className="h-10 rounded-xl bg-blue-600 font-semibold text-white hover:bg-blue-700">
                                 <ShoppingCart className="size-4" /> Open Terminal
                             </Button>
                         </Link>
