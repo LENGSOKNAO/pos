@@ -154,7 +154,7 @@ export default function AppLayout({
                         </h1>
                     </div>
                     <div className="ml-auto flex items-center gap-2 sm:gap-3">
-                        <Deferred data="authProfile" fallback={null}>
+                        <Deferred data="authProfile" fallback={<span className="hidden h-6 w-16 animate-pulse rounded-full bg-slate-100 md:inline-block" />}>
                             {roleName && (
                                 <span className="hidden rounded-full bg-blue-50 px-2.5 py-1 text-xs font-bold text-blue-700 md:inline">
                                     {roleName}
