@@ -350,8 +350,8 @@ export default function PosIndex({
             className={cn(
               'flex h-10 flex-1 items-center gap-2 rounded-xl border px-3 text-sm font-medium transition-colors',
               selectedCustomer
-                ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
-                : 'border-dashed border-slate-300 bg-slate-50 text-slate-600 hover:border-slate-400 hover:bg-slate-100',
+                ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-300'
+                : 'border-dashed border-white/20 bg-white/5 text-slate-300 hover:border-white/40 hover:bg-white/10',
             )}
           >
             <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-slate-900 text-white">
@@ -371,7 +371,7 @@ export default function PosIndex({
               </span>
             )}
           </button>
-          <Button variant="outline" size="sm" onClick={() => setShowCustomerDialog(true)} className="h-10 w-10 shrink-0 rounded-xl px-0" aria-label="Add customer">
+          <Button variant="outline" size="sm" onClick={() => setShowCustomerDialog(true)} className="h-10 w-10 shrink-0 rounded-xl border-white/10 bg-white/5 px-0 text-slate-200 hover:bg-white/10 hover:text-white" aria-label="Add customer">
             <UserPlus className="size-4" />
           </Button>
         </div>
@@ -381,46 +381,46 @@ export default function PosIndex({
       <div className="min-h-0 flex-1 overflow-y-auto px-4 py-3">
         {cart.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center gap-2 py-10 text-center">
-            <span className="flex size-14 items-center justify-center rounded-2xl bg-slate-100">
-              <ShoppingCart className="size-6 text-slate-400" />
+            <span className="flex size-14 items-center justify-center rounded-2xl bg-white/10">
+              <ShoppingCart className="size-6 text-slate-500" />
             </span>
-            <p className="text-sm font-semibold text-slate-700">Cart is empty</p>
+            <p className="text-sm font-semibold text-slate-200">Cart is empty</p>
             <p className="max-w-45 text-xs text-slate-500">Tap a product card to add it to the sale</p>
           </div>
         ) : (
           <ul className="space-y-2">
             {cart.map((item) => (
-              <li key={item.id} className="rounded-xl border border-slate-200 bg-white p-2.5">
+              <li key={item.id} className="rounded-xl border border-white/10 bg-white/5 p-2.5">
                 <div className="flex items-start justify-between gap-2">
-                  <p className="line-clamp-2 min-w-0 flex-1 text-[13px] leading-snug font-semibold text-slate-900">{item.name}</p>
+                  <p className="line-clamp-2 min-w-0 flex-1 text-[13px] leading-snug font-semibold text-white">{item.name}</p>
                   <button
                     onClick={() => removeFromCart(item.id)}
-                    className="rounded-md p-1 text-slate-300 hover:bg-red-50 hover:text-red-600"
+                    className="rounded-md p-1 text-slate-500 hover:bg-red-500/20 hover:text-red-400"
                     aria-label="Remove item"
                   >
                     <Trash2 className="size-4" />
                   </button>
                 </div>
-                <p className="mt-0.5 text-[11px] text-slate-400 tabular-nums">{item.sku} · {formatCurrency(Number(item.unit_price))} each</p>
+                <p className="mt-0.5 text-[11px] text-slate-500 tabular-nums">{item.sku} · {formatCurrency(Number(item.unit_price))} each</p>
                 <div className="mt-2 flex items-center justify-between">
-                  <div className="flex items-center rounded-lg bg-slate-100 p-0.5">
+                  <div className="flex items-center rounded-lg bg-white/10 p-0.5">
                     <button
                       onClick={() => updateQuantity(item.id, -1)}
-                      className="flex size-7 items-center justify-center rounded-md bg-white text-slate-700 shadow-sm hover:bg-slate-50 active:scale-95"
+                      className="flex size-7 items-center justify-center rounded-md bg-transparent text-slate-200 hover:bg-white/10 active:scale-95"
                       aria-label="Decrease quantity"
                     >
                       <Minus className="size-3.5" />
                     </button>
-                    <span className="w-8 text-center text-sm font-extrabold tabular-nums">{item.quantity}</span>
+                    <span className="w-8 text-center text-sm font-extrabold text-white tabular-nums">{item.quantity}</span>
                     <button
                       onClick={() => updateQuantity(item.id, 1)}
-                      className="flex size-7 items-center justify-center rounded-md bg-slate-900 text-white shadow-sm hover:bg-slate-700 active:scale-95"
+                      className="flex size-7 items-center justify-center rounded-md bg-blue-600 text-white shadow-sm hover:bg-blue-500 active:scale-95"
                       aria-label="Increase quantity"
                     >
                       <Plus className="size-3.5" />
                     </button>
                   </div>
-                  <p className="text-sm font-extrabold text-slate-900 tabular-nums">
+                  <p className="text-sm font-extrabold text-white tabular-nums">
                     {formatCurrency(Number(item.unit_price * item.quantity))}
                   </p>
                 </div>
@@ -431,30 +431,30 @@ export default function PosIndex({
       </div>
 
       {/* Sticky checkout footer */}
-      <div className="shrink-0 border-t border-slate-200 bg-white px-4 pt-3 pb-4">
+      <div className="shrink-0 border-t border-white/10 bg-slate-950 px-4 pt-3 pb-4">
         <dl className="space-y-1 text-[13px]">
           <div className="flex justify-between">
-            <dt className="text-slate-500">Subtotal</dt>
-            <dd className="font-semibold text-slate-900 tabular-nums">{formatCurrency(subtotal)}</dd>
+            <dt className="text-slate-400">Subtotal</dt>
+            <dd className="font-semibold text-white tabular-nums">{formatCurrency(subtotal)}</dd>
           </div>
           {totalDiscount > 0 && (
-            <div className="flex justify-between text-emerald-700">
+            <div className="flex justify-between text-emerald-400">
               <dt className="flex items-center gap-1"><BadgePercent className="size-3.5" /> Discount</dt>
               <dd className="font-semibold tabular-nums">-{formatCurrency(totalDiscount)}</dd>
             </div>
           )}
           <div className="flex justify-between">
-            <dt className="text-slate-500">Tax</dt>
-            <dd className="font-semibold text-slate-900 tabular-nums">{formatCurrency(totalTax)}</dd>
+            <dt className="text-slate-400">Tax</dt>
+            <dd className="font-semibold text-white tabular-nums">{formatCurrency(totalTax)}</dd>
           </div>
         </dl>
-        <div className="mt-2 flex items-end justify-between rounded-2xl bg-slate-900 px-4 py-3 text-white">
-          <span className="text-[11px] font-bold tracking-widest uppercase opacity-60">Total</span>
-          <span className="text-[32px] leading-none font-black tracking-tight tabular-nums">{formatCurrency(total)}</span>
+        <div className="mt-2 flex items-end justify-between rounded-2xl bg-emerald-500 px-4 py-3 text-white shadow-lg shadow-emerald-950/50">
+          <span className="text-[11px] font-bold tracking-widest uppercase opacity-80">Total</span>
+          <span className="font-display text-[32px] leading-none font-black tracking-tight tabular-nums">{formatCurrency(total)}</span>
         </div>
 
         {/* Tender keys */}
-        <p className="mt-3 mb-1.5 text-[11px] font-bold tracking-wider text-slate-400 uppercase">Tender</p>
+        <p className="mt-3 mb-1.5 text-[11px] font-bold tracking-wider text-slate-500 uppercase">Tender</p>
         <div className="grid grid-cols-4 gap-1.5">
           {safePaymentMethods.slice(0, 4).map((p) => {
             const Icon = tenderIcon(p.name, p.type);
@@ -467,8 +467,8 @@ export default function PosIndex({
                 className={cn(
                   'flex flex-col items-center gap-1 rounded-xl border px-1 py-2 text-[11px] font-bold transition-all active:scale-95',
                   active
-                    ? 'border-slate-900 bg-slate-900 text-white shadow'
-                    : 'border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-400 hover:bg-white',
+                    ? 'border-blue-500 bg-blue-600 text-white shadow-lg shadow-blue-950/50'
+                    : 'border-white/10 bg-white/5 text-slate-300 hover:border-white/25 hover:bg-white/10',
                 )}
               >
                 <Icon className="size-4" />
@@ -484,7 +484,7 @@ export default function PosIndex({
               const method = safePaymentMethods.find((m) => m.id === e.target.value);
               setPaymentMethod(method || null);
             }}
-            className="mt-1.5 h-9 w-full"
+            className="mt-1.5 h-9 w-full border-white/10 bg-white/5 text-slate-200"
             aria-label="Payment method"
           >
             {safePaymentMethods.map((p) => (
@@ -509,7 +509,7 @@ export default function PosIndex({
               key={d.label}
               type="button"
               onClick={() => setAmountReceived(Number(d.value.toFixed(2)))}
-              className="rounded-lg bg-slate-100 px-2.5 py-1.5 text-xs font-bold text-slate-700 tabular-nums hover:bg-slate-200 active:scale-95"
+              className="rounded-lg bg-white/10 px-2.5 py-1.5 text-xs font-bold text-slate-200 tabular-nums hover:bg-white/20 active:scale-95"
             >
               {d.label}
             </button>
@@ -517,23 +517,23 @@ export default function PosIndex({
         </div>
         <div className="mt-2 flex gap-2">
           <div className="relative flex-1">
-            <span className="absolute top-1/2 left-3 -translate-y-1/2 text-sm font-bold text-slate-400">$</span>
+            <span className="absolute top-1/2 left-3 -translate-y-1/2 text-sm font-bold text-slate-500">$</span>
             <Input
               type="number"
               step="0.01"
               value={amountReceived}
               onChange={(e) => setAmountReceived(parseFloat(e.target.value) || 0)}
               placeholder={total.toFixed(2)}
-              className="h-11 flex-1 pr-3 pl-7 text-base font-extrabold tabular-nums"
+              className="h-11 flex-1 border-white/10 bg-white/5 pr-3 pl-7 text-base font-extrabold text-white tabular-nums placeholder:text-slate-600"
               aria-label="Amount received"
             />
           </div>
         </div>
-        <div className="mt-2 flex items-center justify-between rounded-xl bg-slate-50 px-3 py-2 text-xs font-semibold">
-          <span className={change >= 0 ? 'text-emerald-700' : 'text-red-600'}>
+        <div className="mt-2 flex items-center justify-between rounded-xl bg-white/5 px-3 py-2 text-xs font-semibold">
+          <span className={change >= 0 ? 'text-emerald-400' : 'text-red-400'}>
             Change: {formatCurrency(change)}
           </span>
-          <span className="text-slate-700 tabular-nums">
+          <span className="text-slate-300 tabular-nums">
             Due: {formatCurrency(Math.max(0, total - amountReceived))}
           </span>
         </div>
@@ -541,7 +541,7 @@ export default function PosIndex({
         <Button
           onClick={handleCheckout}
           disabled={cart.length === 0 || isProcessing || amountReceived < total}
-          className="mt-3 h-13 w-full rounded-2xl bg-emerald-600 py-3.5 text-base font-extrabold tracking-wide text-white uppercase hover:bg-emerald-700 disabled:opacity-40"
+          className="mt-3 h-13 w-full rounded-2xl bg-emerald-500 py-3.5 text-base font-extrabold tracking-wide text-white uppercase shadow-lg shadow-emerald-950/50 hover:bg-emerald-400 disabled:opacity-40"
         >
           {isProcessing ? (
             <>
@@ -721,8 +721,8 @@ export default function PosIndex({
 
         {/* Right ticket panel — desktop fixed 400px */}
         <div className="hidden min-h-0 w-[400px] shrink-0 flex-col bg-slate-100 p-3 lg:flex">
-          <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 shadow-sm">
-            <div className="flex h-13 shrink-0 items-center justify-between bg-slate-900 px-4 py-3 text-white">
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-slate-800 bg-slate-950 shadow-sm">
+            <div className="flex h-13 shrink-0 items-center justify-between border-b border-white/10 bg-slate-950 px-4 py-3 text-white">
               <h2 className="flex items-center gap-2 text-[13px] font-extrabold tracking-widest uppercase">
                 <Receipt className="size-4" />
                 Current Sale
@@ -766,8 +766,8 @@ export default function PosIndex({
       {showCartSheet && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div className="absolute inset-0 bg-black/60" onClick={() => setShowCartSheet(false)} />
-          <div className="absolute inset-x-0 bottom-0 flex max-h-[92dvh] flex-col overflow-hidden rounded-t-3xl bg-slate-50 shadow-2xl">
-            <div className="flex shrink-0 items-center justify-between bg-slate-900 px-4 py-3 text-white">
+          <div className="absolute inset-x-0 bottom-0 flex max-h-[92dvh] flex-col overflow-hidden rounded-t-3xl bg-slate-950 shadow-2xl">
+            <div className="flex shrink-0 items-center justify-between border-b border-white/10 bg-slate-950 px-4 py-3 text-white">
               <h2 className="flex items-center gap-2 text-[13px] font-extrabold tracking-widest uppercase">
                 <Receipt className="size-4" />
                 Current Sale

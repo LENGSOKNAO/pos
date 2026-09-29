@@ -125,7 +125,7 @@ export default function Dashboard({ stats: rawStats }: { stats?: Stats }) {
                     <CardHeader className="flex flex-row items-start justify-between pb-1">
                         <div>
                             <p className="text-[11px] font-bold tracking-wider text-slate-500 uppercase">Today&apos;s sales</p>
-                            <p className="mt-1 text-4xl font-extrabold tracking-tight text-slate-900 tabular-nums">{money(stats.todaySalesTotal)}</p>
+                            <p className="mt-1 font-display text-4xl font-extrabold tracking-tight text-slate-900 tabular-nums">{money(stats.todaySalesTotal)}</p>
                             <p className={`mt-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ${up ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'}`}>
                                 {up ? <ArrowUpRight className="size-3" /> : <ArrowDownRight className="size-3" />} {up ? '+' : ''}{stats.salesDelta}% vs yesterday · {stats.todayOrderCount} orders
                             </p>

@@ -17,7 +17,7 @@ export function PageHeader({
         <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0">
                 <div className="flex items-center gap-2">
-                    <h1 className="text-xl font-bold tracking-tight text-slate-900">{title}</h1>
+                    <h1 className="font-display text-xl font-bold tracking-tight text-slate-900">{title}</h1>
                     {count !== undefined && (
                         <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600 tabular-nums">
                             {count}
