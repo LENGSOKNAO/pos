@@ -6,7 +6,6 @@
         { "src": "public/**", "use": "@vercel/static" }
     ],
     "routes": [
-        { "src": "/build/(.*)", "dest": "/public/build/$1" },
         { "src": "/favicon.ico", "dest": "/public/favicon.ico" },
         { "src": "/favicon.svg", "dest": "/public/favicon.svg" },
         { "src": "/apple-touch-icon.png", "dest": "/public/apple-touch-icon.png" },

@@ -50,6 +50,29 @@ Route::get('/healthz', function () {
 
 Route::post('/login', [AuthenticatedSessionController::class, 'store'])->name('login.store');
 
+// Serve Vite build assets through the app (the static route intermittently
+// 404s on hashed files, which breaks all JS/CSS). Hashed filenames are
+// immutable, so cache aggressively.
+Route::get('/build/{path}', function (string $path) {
+    if (str_contains($path, '..') || str_starts_with($path, '.')) {
+        abort(404);
+    }
+    $allowed = $path === 'manifest.json'
+        || $path === 'fonts-manifest.json'
+        || str_starts_with($path, 'assets/');
+    if (! $allowed) {
+        abort(404);
+    }
+    $file = public_path('build/'.$path);
+    if (! is_file($file)) {
+        abort(404);
+    }
+
+    return response()->file($file, [
+        'Cache-Control' => 'public, max-age=31536000, immutable',
+    ]);
+})->where('path', '.*');
+
 Route::middleware('auth')->group(function (): void {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
