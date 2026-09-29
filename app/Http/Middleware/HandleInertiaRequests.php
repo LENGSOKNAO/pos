@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -38,13 +39,18 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'name' => config('app.name'),
+            // Identity only — zero extra queries, so the layout shell
+            // renders instantly on every click.
             'auth' => [
-                'user' => $request->user()?->loadMissing([
-                    'employee.branch:id,name,company_id',
-                    'employee.company:id,name',
-                    'roles.permissions:id,code,name,module',
-                ]),
+                'user' => $request->user()?->only(['id', 'username', 'email', 'status']),
             ],
+            // Heavy profile (employee, branch, roles, permissions) streams
+            // in right after via a deferred request.
+            'authProfile' => Inertia::defer(fn () => $request->user()?->loadMissing([
+                'employee.branch:id,name,company_id',
+                'employee.company:id,name',
+                'roles.permissions:id,code,name,module',
+            ])),
         ];
     }
 }

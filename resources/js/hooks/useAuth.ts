@@ -43,8 +43,10 @@ export interface User {
 }
 
 export function useAuth() {
-  const { props } = usePage<{ auth?: { user?: User } }>();
-  const user = props.auth?.user;
+  const { props } = usePage<{ auth?: { user?: User }; authProfile?: User }>();
+  // Identity arrives instantly; full profile (employee, roles, permissions)
+  // streams in deferred. Merge so everything works before and after load.
+  const user = props.authProfile ?? props.auth?.user;
 
   const hasPermission = (permission: string): boolean => {
     if (!user?.roles) return false;

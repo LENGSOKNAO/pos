@@ -1,4 +1,4 @@
-import { Link, router, usePage } from "@inertiajs/react";
+import { Link, router, usePage, Deferred } from "@inertiajs/react";
 import {
     LayoutDashboard,
     LogOut,
@@ -33,6 +33,11 @@ interface AuthUser {
     roles?: { name?: string }[];
 }
 
+interface AuthProfile extends AuthUser {
+    email?: string | null;
+    status?: string;
+}
+
 export default function AppLayout({
     children,
     fullscreen = false,
@@ -41,12 +46,17 @@ export default function AppLayout({
     if (fullscreen) {
         return <div className="min-h-screen bg-slate-100">{children}</div>;
     }
-    const { url, props } = usePage<{ auth?: { user?: AuthUser } }>();
-    const user = props.auth?.user;
+    const { url, props } = usePage<{
+        auth?: { user?: AuthUser };
+        authProfile?: AuthProfile;
+    }>();
+    // Identity (username) arrives with the shell; full profile streams deferred.
+    const identity = props.auth?.user;
+    const profile = props.authProfile;
     const fullName =
-        `${user?.employee?.first_name ?? ""} ${user?.employee?.last_name ?? ""}`.trim();
-    const userName = fullName || user?.username || "Cashier";
-    const roleName = user?.roles?.[0]?.name ?? "";
+        `${profile?.employee?.first_name ?? ""} ${profile?.employee?.last_name ?? ""}`.trim();
+    const userName = fullName || identity?.username || "Cashier";
+    const roleName = profile?.roles?.[0]?.name ?? "";
     const today = new Date().toLocaleDateString("en-US", {
         weekday: "long",
         month: "short",
@@ -144,11 +154,13 @@ export default function AppLayout({
                         </h1>
                     </div>
                     <div className="ml-auto flex items-center gap-2 sm:gap-3">
-                        {roleName && (
-                            <span className="hidden rounded-full bg-blue-50 px-2.5 py-1 text-xs font-bold text-blue-700 md:inline">
-                                {roleName}
-                            </span>
-                        )}
+                        <Deferred data="authProfile" fallback={null}>
+                            {roleName && (
+                                <span className="hidden rounded-full bg-blue-50 px-2.5 py-1 text-xs font-bold text-blue-700 md:inline">
+                                    {roleName}
+                                </span>
+                            )}
+                        </Deferred>
                         <span className="flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 py-1 pr-3 pl-1 text-sm font-semibold text-slate-700">
                             <span className="flex size-8 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-700 text-xs font-black text-white">
                                 {userName.charAt(0).toUpperCase()}
