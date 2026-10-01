@@ -2,7 +2,6 @@ import { Head, router, Deferred } from '@inertiajs/react';
 import { useState } from 'react';
 import { Warehouse } from 'lucide-react';
 import AppLayout from '@/layouts/app-layout';
-import StockController from '@/actions/App/Http/Controllers/StockController';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { EmptyState, PageHeader, SearchInput, TableSkeleton } from '@/components/admin';
@@ -38,8 +37,11 @@ export default function StocksIndex({ stocks, filters }: Props) {
                 title="Stock"
                 count={safeStocks.length}
                 description="Live on-hand quantities by warehouse — reorder risks surface first."
-                actions={<SearchInput value={search} onChange={setSearch} onSubmit={submit} placeholder="Search stocks…" />}
+                actions={
+                    <SearchInput value={search} onChange={setSearch} onSubmit={submit} placeholder="Search stocks…" className="w-full sm:w-64" />
+                }
             />
+            <div className="mb-4 rounded-xl border border-slate-200 bg-white p-3">
             <Deferred data="stocks" fallback={<TableSkeleton cols={4} />}>
             <Table>
                 <TableHeader>
@@ -69,6 +71,7 @@ export default function StocksIndex({ stocks, filters }: Props) {
                 </TableBody>
             </Table>
             </Deferred>
+            </div>
         </AppLayout>
     );
 }

@@ -3,33 +3,60 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
 const badgeVariants = cva(
-  'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+  'inline-flex items-center justify-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors',
   {
     variants: {
       variant: {
-        default: 'border-transparent bg-primary text-primary-foreground hover:bg-primary/80',
-        secondary: 'border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80',
-        destructive: 'border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80',
-        outline: 'text-foreground',
-        success: 'border-transparent bg-emerald-100 text-emerald-800 hover:bg-emerald-200',
-        warning: 'border-transparent bg-amber-100 text-amber-800 hover:bg-amber-200',
-        info: 'border-transparent bg-blue-100 text-blue-800 hover:bg-blue-200',
+        default: 'bg-neutral-100 text-neutral-700',
+        primary: 'bg-brand-100 text-brand-700',
+        secondary: 'bg-neutral-100 text-neutral-700',
+        success: 'bg-success-100 text-success-700',
+        warning: 'bg-warning-100 text-warning-700',
+        error: 'bg-error-100 text-error-700',
+        destructive: 'bg-error-100 text-error-700',
+        outline: 'border border-neutral-300 bg-transparent text-neutral-700 hover:bg-neutral-50',
+        ghost: 'bg-transparent text-neutral-600 hover:bg-neutral-100',
+      },
+      size: {
+        sm: 'px-2 py-0.5 text-[10px]',
+        md: 'px-2.5 py-0.5 text-xs',
+        lg: 'px-3 py-1 text-sm',
+      },
+      dot: {
+        true: '',
+        false: '',
       },
     },
-    defaultVariants: { variant: 'default' },
-  }
+    defaultVariants: { variant: 'default', size: 'md', dot: false },
+  },
 );
 
 export interface BadgeProps
-  extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof badgeVariants> {}
+  extends React.HTMLAttributes<HTMLSpanElement>,
+    VariantProps<typeof badgeVariants> {
+  dot?: boolean;
+  dotColor?: string;
+}
 
-const Badge = React.forwardRef<HTMLDivElement, BadgeProps>(
-  ({ className, variant, ...props }, ref) => {
+const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
+  ({ className, variant, size, dot, dotColor, children, ...props }, ref) => {
     return (
-      <div ref={ref} className={cn(badgeVariants({ variant }), className)} {...props} />
+      <span
+        ref={ref}
+        className={cn(badgeVariants({ variant, size, className }))}
+        {...props}
+      >
+        {dot && (
+          <span
+            className="relative flex h-1.5 w-1.5 shrink-0 rounded-full"
+            style={{ backgroundColor: dotColor || 'currentColor' }}
+            aria-hidden="true"
+          />
+        )}
+        {children}
+      </span>
     );
-  }
+  },
 );
 Badge.displayName = 'Badge';
 

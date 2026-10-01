@@ -96,20 +96,36 @@ class PosController extends BaseApiController
             $warehouseId = $employee->branch?->warehouses()->first()?->id;
             $customerId = $data['customer_id'] ?? null;
 
-            // Calculate totals using server-side prices unless override is permitted + audited
+            // Initialize tracking
             $subtotal = 0;
             $totalDiscount = $data['discount'] ?? 0;
             $totalTax = $data['tax'] ?? 0;
             $priceOverrides = [];
+            $itemsProcessed = [];
 
-            foreach ($data['items'] as $item) {
-                $product = Product::findOrFail($item['product_id']);
+            // Validate and process each item
+            foreach ($data['items'] as $itemData) {
+                $product = Product::findOrFail($itemData['product_id']);
                 if ($product->status !== 'active') {
                     throw new \DomainException("Product {$product->name} is inactive.");
                 }
+
+                // Check stock availability before proceeding
+                $stock = Stock::where('product_id', $product->id)
+                    ->where('warehouse_id', $warehouseId)
+                    ->lockForUpdate()
+                    ->first();
+
+                if (! $stock || (float) $stock->availableQuantity < (float) $itemData['quantity']) {
+                    throw new \DomainException("Insufficient stock for {$product->name}. Available: {$stock?->availableQuantity ?? 0}");
+                }
+
+                // Determine price - use server price unless override is permitted
                 $serverPrice = (float) $product->selling_price;
-                $givenPrice = (float) $item['unit_price'];
-                if (abs($givenPrice - $serverPrice) > 0.0001) {
+                $givenPrice = (float) $itemData['unit_price'];
+                $priceIsOverridden = abs($givenPrice - $serverPrice) > 0.0001;
+
+                if ($priceIsOverridden) {
                     if (! $user->hasPermission('sales.price_override')) {
                         throw new \DomainException("Price override denied for {$product->name}.");
                     }
@@ -119,19 +135,39 @@ class PosController extends BaseApiController
                         'after' => $givenPrice,
                     ];
                 }
-                $itemTotal = $item['quantity'] * $givenPrice;
-                $itemDiscount = $item['discount'] ?? 0;
-                $itemTax = $item['tax'] ?? 0;
-                $subtotal += $itemTotal - $itemDiscount + $itemTax;
+
+                // Use the given price if overridden, otherwise server price
+                $effectivePrice = $priceIsOverridden ? $givenPrice : $serverPrice;
+
+                $itemTotal = $itemData['quantity'] * $effectivePrice;
+                $itemDiscount = $itemData['discount'] ?? 0;
+                $itemTax = $itemData['tax'] ?? 0;
+                $itemNetTotal = $itemTotal - $itemDiscount + $itemTax;
+
+                $itemsProcessed[] = [
+                    'product' => $product,
+                    'quantity' => $itemData['quantity'],
+                    'unit_price' => $effectivePrice,
+                    'discount' => $itemDiscount,
+                    'tax' => $itemTax,
+                    'net_total' => $itemNetTotal,
+                    'cost_price' => $product->cost_price,
+                ];
+
+                $subtotal += $itemNetTotal;
             }
 
             $total = $subtotal - $totalDiscount + $totalTax;
 
+            // Validate payment sufficiency
             $paidSum = collect($data['payments'])->sum(fn ($p) => (float) $p['amount']);
             $hasCredit = collect($data['payments'])->contains(fn ($p) => PaymentMethod::find($p['payment_method_id'])?->code === 'credit');
-            if ($paidSum < $total && ! $hasCredit && empty($customerId)) {
+            $hasCustomer = !empty($customerId);
+
+            if ($paidSum < $total && ! $hasCredit && ! $hasCustomer) {
                 throw new \DomainException('Payment insufficient: received '.$paidSum.' of '.$total.'.');
             }
+
             $invoiceStatus = $paidSum >= $total ? 'paid' : ($paidSum > 0 ? 'partial' : 'unpaid');
 
             // Create sales order
@@ -150,50 +186,45 @@ class PosController extends BaseApiController
             ]);
 
             // Create sales order items and update stock
-            foreach ($data['items'] as $item) {
-                $product = Product::findOrFail($item['product_id']);
-                $costPrice = $product->cost_price;
-                $itemTotal = $item['quantity'] * $item['unit_price'];
-                $itemDiscount = $item['discount'] ?? 0;
-                $itemTax = $item['tax'] ?? 0;
-                $itemNetTotal = $itemTotal - $itemDiscount + $itemTax;
+            foreach ($itemsProcessed as $processed) {
+                $product = $processed['product'];
+                $item = $processed;
 
                 SalesOrderItem::create([
                     'sales_order_id' => $salesOrder->id,
-                    'product_id' => $item['product_id'],
+                    'product_id' => $product->id,
                     'quantity' => $item['quantity'],
                     'unit_price' => $item['unit_price'],
-                    'discount' => $itemDiscount,
-                    'tax' => $itemTax,
-                    'cost_price' => $costPrice,
-                    'total' => $itemNetTotal,
+                    'discount' => $item['discount'],
+                    'tax' => $item['tax'],
+                    'cost_price' => $item['cost_price'],
+                    'total' => $item['net_total'],
                 ]);
 
                 // Update stock with row lock + availability check
-                $stock = Stock::where('product_id', $item['product_id'])
+                $stock = Stock::where('product_id', $product->id)
                     ->where('warehouse_id', $warehouseId)
                     ->lockForUpdate()
                     ->first();
 
-                if (! $stock || (float) $stock->quantity < (float) $item['quantity']) {
-                    throw new \DomainException("Insufficient stock for {$product->name}.");
-                }
-                $before = (float) $stock->quantity;
-                $stock->quantity = $before - (float) $item['quantity'];
-                $stock->save();
+                if ($stock) {
+                    $before = (float) $stock->quantity;
+                    $stock->quantity = $before - $item['quantity'];
+                    $stock->save();
 
-                // Create stock movement
-                StockMovement::create([
-                    'product_id' => $item['product_id'],
-                    'warehouse_id' => $stock->warehouse_id,
-                    'movement_type' => 'sale',
-                    'reference_type' => 'sales_order',
-                    'reference_id' => $salesOrder->id,
-                    'quantity' => -$item['quantity'],
-                    'unit_cost' => $costPrice,
-                    'balance_after' => $stock->quantity,
-                    'employee_id' => $employee->id,
-                ]);
+                    // Create stock movement
+                    StockMovement::create([
+                        'product_id' => $product->id,
+                        'warehouse_id' => $stock->warehouse_id,
+                        'movement_type' => 'sale',
+                        'reference_type' => 'sales_order',
+                        'reference_id' => $salesOrder->id,
+                        'quantity' => -$item['quantity'],
+                        'unit_cost' => $item['cost_price'],
+                        'balance_after' => $stock->quantity,
+                        'employee_id' => $employee->id,
+                    ]);
+                }
             }
 
             // Create invoice
@@ -285,7 +316,7 @@ class PosController extends BaseApiController
                 'invoice' => $invoice->load('items.product'),
                 'payments' => $invoice->payments,
             ], 'Checkout completed successfully');
-        });
+        }));
     }
 
     public function hold(Request $request)
@@ -302,14 +333,36 @@ class PosController extends BaseApiController
         ]);
 
         $employee = auth()->user()->employee;
+        $warehouseId = $employee->branch?->warehouses()->first()?->id;
+        $customerId = $data['customer_id'] ?? null;
 
-        return DB::transaction(function () use ($data, $employee) {
+        return DB::transaction(function () use ($data, $employee, $warehouseId, $customerId) {
             $subtotal = 0;
-            foreach ($data['items'] as $item) {
-                $itemTotal = $item['quantity'] * $item['unit_price'];
-                $itemDiscount = $item['discount'] ?? 0;
-                $itemTax = $item['tax'] ?? 0;
-                $subtotal += $itemTotal - $itemDiscount + $itemTax;
+            $itemsProcessed = [];
+
+            foreach ($data['items'] as $itemData) {
+                $product = Product::findOrFail($itemData['product_id']);
+                if ($product->status !== 'active') {
+                    throw new \DomainException("Product {$product->name} is inactive.");
+                }
+
+                // Check stock availability
+                $stock = Stock::where('product_id', $product->id)
+                    ->where('warehouse_id', $warehouseId)
+                    ->lockForUpdate()
+                    ->first();
+
+                if (! $stock || (float) $stock->availableQuantity < (float) $itemData['quantity']) {
+                    throw new \DomainException("Insufficient stock for {$product->name}.");
+                }
+
+                $subtotal += $itemData['unit_price'] * $itemData['quantity'];
+                $itemsProcessed[] = [
+                    'product' => $product,
+                    'quantity' => $itemData['quantity'],
+                    'unit_price' => $itemData['unit_price'],
+                    'cost_price' => $product->cost_price,
+                ];
             }
 
             $salesOrder = SalesOrder::create([
@@ -326,17 +379,29 @@ class PosController extends BaseApiController
                 'status' => 'held',
             ]);
 
-            foreach ($data['items'] as $item) {
+            foreach ($itemsProcessed as $item) {
                 SalesOrderItem::create([
                     'sales_order_id' => $salesOrder->id,
-                    'product_id' => $item['product_id'],
+                    'product_id' => $item['product']->id,
                     'quantity' => $item['quantity'],
                     'unit_price' => $item['unit_price'],
-                    'discount' => $item['discount'] ?? 0,
-                    'tax' => $item['tax'] ?? 0,
-                    'cost_price' => Product::find($item['product_id'])->cost_price,
+                    'discount' => 0,
+                    'tax' => 0,
+                    'cost_price' => $item['cost_price'],
                     'total' => $item['quantity'] * $item['unit_price'],
                 ]);
+
+                // Reserve stock - decrement available quantity
+                $stock = Stock::where('product_id', $item['product']->id)
+                    ->where('warehouse_id', $warehouseId)
+                    ->lockForUpdate()
+                    ->first();
+
+                if ($stock) {
+                    $before = (float) $stock->quantity;
+                    $stock->quantity = $before - $item['quantity'];
+                    $stock->save();
+                }
             }
 
             return $this->success($salesOrder->load('items.product'), 'Order held successfully');
@@ -347,7 +412,7 @@ class PosController extends BaseApiController
     {
         $employee = auth()->user()->employee;
 
-        $heldOrders = SalesOrder::with('items.product', 'customer')
+        $heldOrders = SalesOrder::with(['items.product', 'customer'])
             ->where('employee_id', $employee->id)
             ->where('status', 'held')
             ->latest()

@@ -10,7 +10,6 @@ import { Select } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
 import { FormField, FormSection, FormActions } from '@/components/ui/form';
-import { api } from '@/services/api';
 import { TableSkeleton } from '@/components/admin';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -127,7 +126,6 @@ export default function CustomersIndex({
     { key: 'actions', header: 'Actions', accessor: (item) => (
       <div className="flex items-center gap-1">
         <button onClick={() => router.get(`/customers/${item.id}`)} className="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100" aria-label="View"><Eye className="size-4" /></button>
-        <button onClick={() => handleEdit(item)} className="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100" aria-label="Edit"><Edit className="size-4" /></button>
         <button onClick={() => router.get(`/customers/${item.id}/statement`)} className="p-1.5 rounded-lg text-blue-500 hover:bg-blue-50" aria-label="Statement"><DollarSign className="size-4" /></button>
         <button onClick={() => router.get(`/customers/${item.id}/loyalty`)} className="p-1.5 rounded-lg text-amber-500 hover:bg-amber-50" aria-label="Loyalty"><RotateCcw className="size-4" /></button>
         <button onClick={() => router.get(`/customers/${item.id}/edit`)} className="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100" aria-label="Edit"><Edit className="size-4" /></button>
@@ -139,7 +137,7 @@ export default function CustomersIndex({
   return (
     <AppLayout title="Customers">
       <Head title="Customers" />
-      <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="text-xl font-bold tracking-tight text-slate-900">Customers</h1>
           <p className="mt-1 text-sm text-slate-500">Customer book — credit, loyalty and lifetime value in one place.</p>
@@ -150,7 +148,7 @@ export default function CustomersIndex({
           </DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader><DialogTitle>Create Customer</DialogTitle></DialogHeader>
-            <form onSubmit={(e) => { e.preventDefault(); createForm.post('/api/v1/customers', { onSuccess: () => { setIsCreateOpen(false); createForm.reset(); } }); }} className="p-4 space-y-4">
+            <form onSubmit={(e) => { e.preventDefault(); createForm.post('/api/v1/customers', { onSuccess: () => { setIsCreateOpen(false); createForm.reset(); } }); }} className="p-4 space-y-4 rounded-xl border border-slate-200 bg-white">
               <FormSection title="Basic Information">
                 <div className="grid gap-4 sm:grid-cols-2">
                   <FormField label="Company" required><Select value={createForm.data.company_id} onChange={e => createForm.setData('company_id', e.target.value)}>{safeCompanies.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</Select></FormField>
@@ -178,8 +176,8 @@ export default function CustomersIndex({
         </Dialog>
       </div>
 
-      <div className="mb-4 flex flex-col gap-2 rounded-2xl border border-slate-200 bg-white p-3 sm:flex-row sm:items-center">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+      <div className="mb-4 rounded-xl border border-slate-200 bg-white p-3 sm:p-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <Input placeholder="Search customers..." value={search} onChange={e => setSearch(e.target.value)} className="w-full sm:w-64" />
           <Select value={groupFilter} onChange={e => setGroupFilter(e.target.value)} className="w-full sm:w-48"><option value="">All Groups</option>{safeGroups.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}</Select>
           <Select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="w-full sm:w-40"><option value="">All Status</option><option value="active">Active</option><option value="inactive">Inactive</option><option value="blocked">Blocked</option></Select>

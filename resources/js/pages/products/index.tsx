@@ -99,7 +99,6 @@ export default function ProductsIndex({
     wholesale_price: 0,
     vip_price: 0,
     minimum_price: 0,
-    reorder_level: 0,
     maximum_stock: 0,
     track_batch: false,
     track_expiry: false,
@@ -123,8 +122,7 @@ export default function ProductsIndex({
       category_id: product.category_id,
       brand_id: product.brand_id,
       unit_id: product.unit_id,
-      sku: product.sku,
-      barcode: product.barcode || '',
+      sku: product.sku || '',
       name: product.name,
       description: product.description || '',
       cost_price: product.cost_price,
@@ -132,7 +130,6 @@ export default function ProductsIndex({
       wholesale_price: product.wholesale_price,
       vip_price: product.vip_price,
       minimum_price: product.minimum_price,
-      reorder_level: product.reorder_level,
       maximum_stock: product.maximum_stock,
       track_batch: product.track_batch,
       track_expiry: product.track_expiry,
@@ -177,10 +174,10 @@ export default function ProductsIndex({
     { key: 'status', header: 'Status', accessor: (item) => <Badge variant={item.status === 'active' ? 'success' : 'secondary'}>{item.status}</Badge> },
     { key: 'actions', header: 'Actions', accessor: (item) => (
       <div className="flex items-center gap-1">
-        <button onClick={() => handleEdit(item)} className="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100" aria-label="Edit">
+        <button onClick={() => router.get(`/products/${item.id}`)} className="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100" aria-label="Edit">
           <Eye className="size-4" />
         </button>
-        <button onClick={() => handleDelete(item)} className="p-1.5 rounded-lg text-red-500 hover:bg-red-50" aria-label="Delete">
+        <button onClick={() => handleEdit(item)} className="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100" aria-label="Delete">
           <Trash2 className="size-4" />
         </button>
       </div>
@@ -191,7 +188,7 @@ export default function ProductsIndex({
     <AppLayout title="Products">
       <Head title="Products" />
       
-      <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="text-xl font-bold tracking-tight text-slate-900">Products</h1>
           <p className="mt-1 text-sm text-slate-500">Product catalog — pricing, SKUs and availability at a glance.</p>
@@ -207,7 +204,7 @@ export default function ProductsIndex({
               <DialogHeader>
                 <DialogTitle>Create Product</DialogTitle>
               </DialogHeader>
-              <form onSubmit={handleCreate} className="p-4 space-y-4">
+              <form onSubmit={handleCreate} className="p-4 space-y-4 rounded-xl border border-slate-200 bg-white">
                 <FormSection title="Basic Information">
                   <div className="grid gap-4 sm:grid-cols-2">
                     <FormField label="Company" required error={createForm.errors.company_id}>
@@ -391,10 +388,9 @@ export default function ProductsIndex({
                     {createForm.processing ? 'Creating...' : 'Create Product'}
                   </button>
                 </FormActions>
-              </form>
-            </DialogContent>
-          </Dialog>
-        )}
+            </form>
+          </DialogContent>
+        </Dialog>        )}
 
         <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
           <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
@@ -495,58 +491,58 @@ export default function ProductsIndex({
             </form>
           </DialogContent>
         </Dialog>
-      </div>
-
-      <div className="mb-4 flex flex-col gap-2 rounded-2xl border border-slate-200 bg-white p-3 sm:flex-row sm:items-center">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-          <Input
-            placeholder="Search products..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full sm:w-64"
-          />
-          <Select
-            value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
-            className="w-full sm:w-48"
-          >
-            <option value="">All Categories</option>
-            {safeCategories.map((c: any) => <option key={c.id} value={c.id}>{c.name}</option>)}
-          </Select>
-          <Select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="w-full sm:w-40"
-          >
-            <option value="">All Status</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-            <option value="discontinued">Discontinued</option>
-          </Select>
         </div>
-      </div>
 
-      <Deferred data="products" fallback={<TableSkeleton cols={6} />}>
-      <DataTable
-        columns={columns}
-        data={safeProducts.data ?? []}
-        keyAccessor={(item) => item.id}
-        onRowClick={(item) => handleEdit(item)}
-        pagination={{
-          currentPage: safeProducts.current_page ?? 1,
-          lastPage: safeProducts.last_page ?? 1,
-          perPage: safeProducts.per_page ?? 15,
-          total: safeProducts.total ?? 0,
-          onPageChange: (page) => router.get('/products', { page }, { only: ['products'], preserveState: true, preserveScroll: true }),
-          buildUrl: () => '/products',
-          prefetchOnly: ['products'],
-          prefetchData: (page) => ({ page }),
-        }}
-        sortBy={safeProducts.sort_by}
-        sortOrder={safeProducts.sort_order}
-        onSort={(key, order) => router.get(`/products?sort_by=${key}&sort_order=${order}`)}
-      />
-      </Deferred>
-    </AppLayout>
-  );
-}
+        <div className="mb-4 rounded-xl border border-slate-200 bg-white p-3 sm:flex-row sm:items-center">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <Input
+              placeholder="Search products..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full sm:w-64"
+            />
+            <Select
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+              className="w-full sm:w-48"
+            >
+              <option value="">All Categories</option>
+              {safeCategories.map((c: any) => <option key={c.id} value={c.id}>{c.name}</option>)}
+            </Select>
+            <Select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="w-full sm:w-40"
+            >
+              <option value="">All Status</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+              <option value="discontinued">Discontinued</option>
+            </Select>
+          </div>
+        </div>
+
+        <Deferred data="products" fallback={<TableSkeleton cols={6} />}>
+        <DataTable
+          columns={columns}
+          data={safeProducts.data ?? []}
+          keyAccessor={(item) => item.id}
+          onRowClick={(item) => handleEdit(item)}
+          pagination={{
+            currentPage: safeProducts.current_page ?? 1,
+            lastPage: safeProducts.last_page ?? 1,
+            perPage: safeProducts.per_page ?? 15,
+            total: safeProducts.total ?? 0,
+            onPageChange: (page) => router.get('/products', { page }, { only: ['products'], preserveState: true, preserveScroll: true }),
+            buildUrl: () => '/products',
+            prefetchOnly: ['products'],
+            prefetchData: (page) => ({ page }),
+          }}
+          sortBy={safeProducts.sort_by}
+          sortOrder={safeProducts.sort_order}
+          onSort={(key, order) => router.get(`/products?sort_by=${key}&sort_order=${order}`)}
+        />
+        </Deferred>
+      </AppLayout>
+    );
+  }

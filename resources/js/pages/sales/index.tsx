@@ -57,13 +57,13 @@ export default function SalesIndex({ sales, filters }: { sales?: SalesPaginator;
                     { label: 'Collected', value: `$${safeSales.data.reduce((s, x) => s + Number(x.paid_amount || 0), 0).toFixed(2)}` },
                     { label: 'Outstanding', value: `$${safeSales.data.reduce((s, x) => s + Number(x.balance || 0), 0).toFixed(2)}` },
                 ].map((s) => (
-                    <div key={s.label} className="rounded-2xl border border-slate-200 bg-white px-4 py-3">
+                    <div key={s.label} className="rounded-xl border border-slate-200 bg-white px-4 py-3 hover:bg-slate-100 transition-colors">
                         <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">{s.label}</p>
                         <p className="mt-0.5 text-lg font-extrabold tabular-nums text-slate-900">{s.value}</p>
                     </div>
                 ))}
             </div>
-            <Card className="mb-4 flex flex-wrap items-end gap-2 rounded-2xl border-slate-200 p-4 shadow-[0_1px_2px_rgba(15,23,42,0.05)]">
+            <Card className="mb-4 rounded-xl border border-slate-200 bg-white p-4 shadow-[0_1px_2px_rgba(15,23,42,0.05)] transition-all hover:shadow-sm hover:bg-slate-100">
                 <div>
                     <label className="mb-1 block text-[11px] font-semibold tracking-wider text-slate-500 uppercase">Status</label>
                     <select value={status} onChange={(e) => setStatus(e.target.value)} className="h-10 rounded-xl border border-slate-200 bg-white px-2 text-sm">
@@ -96,13 +96,13 @@ export default function SalesIndex({ sales, filters }: { sales?: SalesPaginator;
                 <tbody>
                     {safeSales.data.map((s) => (
                         <tr key={s.id} className="border-t border-slate-200 hover:bg-slate-50">
-                            <td className={tdCls}><Link href={`/sales/${s.id}`} className="font-mono font-semibold text-blue-700 hover:underline">{s.invoice_no}</Link></td>
+                            <td className={tdCls}><Link href={`/sales/${s.id}`} className="font-mono font-semibold text-slate-700 hover:underline">{s.invoice_no}</Link></td>
                             <td className={`${tdCls} text-slate-500`}>{s.customer ?? '—'}</td>
                             <td className={`${tdCls} text-right font-bold tabular-nums`}>${Number(s.grand_total).toFixed(2)}</td>
                             <td className={`${tdCls} text-right tabular-nums`}>${Number(s.paid_amount).toFixed(2)}</td>
                             <td className={tdCls}>
                                 {s.balance <= 0.009
-                                    ? <Badge className="border-transparent bg-emerald-100 text-emerald-700 hover:bg-emerald-100">Paid</Badge>
+                                    ? <Badge className="border-transparent bg-amber-100 text-amber-700 hover:bg-amber-100">Paid</Badge>
                                     : <Badge className="border-transparent bg-red-100 text-red-700 hover:bg-red-100 tabular-nums">Due ${s.balance.toFixed(2)}</Badge>}
                             </td>
                             <td className={`${tdCls} text-slate-500`}>{s.created_at}</td>
@@ -114,7 +114,7 @@ export default function SalesIndex({ sales, filters }: { sales?: SalesPaginator;
                 </tbody>
             </TableShell>
             {safeSales.last_page > 1 && (
-            <div className="mt-3 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.05)]">
+            <div className="mt-3 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
                 <Pagination currentPage={safeSales.current_page} lastPage={safeSales.last_page} perPage={safeSales.per_page} total={safeSales.total} onPageChange={goToPage} showPerPageSelector={false} buildUrl={() => '/sales'} prefetchOnly={['sales']} prefetchData={(page) => pageParams(page)} />
             </div>
             )}

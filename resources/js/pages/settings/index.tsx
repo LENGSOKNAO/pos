@@ -82,7 +82,7 @@ export default function SettingsIndex({ settings }: { settings?: any }) {
     <AppLayout title="Settings">
       <Head title="Settings" />
       
-      <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between rounded-xl border border-slate-200 bg-white p-3 sm:p-4">
         <div>
           <h1 className="text-xl font-bold tracking-tight text-slate-900">Settings</h1>
           <p className="mt-1 text-sm text-slate-500">Configure company, POS, invoicing, tax, payments, and alerts.</p>

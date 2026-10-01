@@ -443,10 +443,12 @@ export default function PosIndex({
               <dd className="font-semibold tabular-nums">-{formatCurrency(totalDiscount)}</dd>
             </div>
           )}
-          <div className="flex justify-between">
-            <dt className="text-slate-400">Tax</dt>
-            <dd className="font-semibold text-white tabular-nums">{formatCurrency(totalTax)}</dd>
-          </div>
+          {totalTax > 0 && (
+            <div className="flex justify-between">
+              <dt className="text-slate-400">Tax</dt>
+              <dd className="font-semibold text-white tabular-nums">{formatCurrency(totalTax)}</dd>
+            </div>
+          )}
         </dl>
         <div className="mt-2 flex items-end justify-between rounded-2xl bg-emerald-500 px-4 py-3 text-white shadow-lg shadow-emerald-950/50">
           <span className="text-[11px] font-bold tracking-widest uppercase opacity-80">Total</span>
@@ -465,14 +467,14 @@ export default function PosIndex({
                 type="button"
                 onClick={() => setPaymentMethod(p)}
                 className={cn(
-                  'flex flex-col items-center gap-1 rounded-xl border px-1 py-2 text-[11px] font-bold transition-all active:scale-95',
+                  'flex flex-col items-center gap-1 rounded-xl border px-1.5 py-2 text-[10px] font-bold transition-all active:scale-95',
                   active
                     ? 'border-blue-500 bg-blue-600 text-white shadow-lg shadow-blue-950/50'
-                    : 'border-white/10 bg-white/5 text-slate-300 hover:border-white/25 hover:bg-white/10',
+                    : 'border-white/15 bg-white/5 text-slate-300 hover:border-white/25 hover:bg-white/10 cursor-pointer',
                 )}
               >
-                <Icon className="size-4" />
-                <span className="max-w-full truncate">{p.name}</span>
+                <Icon className="size-4 mb-0.5" />
+                <span className="max-w-full truncate text-slate-200 hover:text-slate-600">{p.name}</span>
               </button>
             );
           })}
@@ -495,8 +497,8 @@ export default function PosIndex({
           </Select>
         )}
 
-        {/* Quick cash */}
-        <div className="mt-2 flex flex-wrap gap-1.5">
+        {/* Product grid */}
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 2xl:grid-cols-4">
           {[
             { label: 'Exact', value: total },
             { label: '$5', value: 5 },
@@ -509,7 +511,10 @@ export default function PosIndex({
               key={d.label}
               type="button"
               onClick={() => setAmountReceived(Number(d.value.toFixed(2)))}
-              className="rounded-lg bg-white/10 px-2.5 py-1.5 text-xs font-bold text-slate-200 tabular-nums hover:bg-white/20 active:scale-95"
+              className={cn(
+                'rounded-lg bg-white/10 px-2.5 py-1.5 text-xs font-bold text-slate-200 tabular-nums hover:bg-white/20 active:scale-95',
+                amountReceived === Number(d.value.toFixed(2)) ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-950/50' : ''
+              )}
             >
               {d.label}
             </button>
@@ -541,7 +546,7 @@ export default function PosIndex({
         <Button
           onClick={handleCheckout}
           disabled={cart.length === 0 || isProcessing || amountReceived < total}
-          className="mt-3 h-13 w-full rounded-2xl bg-emerald-500 py-3.5 text-base font-extrabold tracking-wide text-white uppercase shadow-lg shadow-emerald-950/50 hover:bg-emerald-400 disabled:opacity-40"
+          className="mt-3 h-13 w-full rounded-2xl bg-emerald-500 py-3.5 text-base font-extrabold tracking-wide text-white uppercase shadow-lg shadow-emerald-950/50 hover:bg-emerald-400 disabled:opacity-40 transition-colors"
         >
           {isProcessing ? (
             <>
@@ -648,7 +653,7 @@ export default function PosIndex({
                   title={c.name}
                   className={cn(
                     'flex shrink-0 flex-col items-center gap-1 rounded-xl px-2 py-2.5 text-xs font-bold transition-all active:scale-95',
-                    active ? 'bg-slate-900 text-white shadow' : 'bg-slate-50 text-slate-600 hover:bg-slate-100',
+                    active ? 'bg-brand-600 text-white shadow-lg shadow-blue-950/50' : 'bg-white/5 text-slate-300 hover:bg-white/10',
                   )}
                 >
                   <span className={cn(
@@ -675,7 +680,7 @@ export default function PosIndex({
                   />
                 </div>
               ) : (
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 2xl:grid-cols-4">
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 2xl:grid-cols-4 md:gap-2">
                   {productsToShow.map((product) => {
                     const stock = stockOf(product);
                     const low = stock <= (product.reorder_level || 0);
@@ -686,10 +691,10 @@ export default function PosIndex({
                         onClick={() => addToCart(product)}
                         disabled={out}
                         className={cn(
-                          'group flex flex-col overflow-hidden rounded-2xl border bg-white text-left transition-all active:scale-[0.97]',
+                          'group flex flex-col overflow-hidden rounded-2xl border bg-white text-left transition-all duration-200 active:scale-[0.98]',
                           out
                             ? 'cursor-not-allowed border-slate-200 opacity-55'
-                            : 'border-slate-200 hover:border-slate-900 hover:shadow-lg',
+                            : 'border-slate-200 hover:border-slate-900 hover:shadow-lg hover:bg-slate-50',
                         )}
                       >
                         <div className={cn('relative flex h-20 items-center justify-center', tileColor(product.name).split(' ')[0])}>
@@ -710,6 +715,11 @@ export default function PosIndex({
                             ${Number(product.selling_price).toFixed(2)}
                           </span>
                         </div>
+                        {out ? null : (
+                          <div className="mt-1 text-sm text-slate-500">
+                            {stock <= 5 && `Only ${stock} left`}{stock <= 0 && 'Out of stock'}
+                          </div>
+                        )}
                       </button>
                     );
                   })}
@@ -730,12 +740,12 @@ export default function PosIndex({
               </h2>
               <div className="flex items-center gap-1">
                 {hasPermission('pos.hold_order') && (
-                  <button onClick={handleHold} title="Hold order" className="rounded-lg p-1.5 text-white/70 hover:bg-white/10 hover:text-white">
+                  <button onClick={handleHold} title="Hold order" className={cn('rounded-lg p-1.5 hover:bg-white/10 hover:text-white', isProcessing ? 'opacity-50 cursor-not-allowed' : '')}>
                     <Pause className="size-4" />
                   </button>
                 )}
                 {cart.length > 0 && (
-                  <button onClick={clearCart} title="Clear cart" className="rounded-lg p-1.5 text-white/70 hover:bg-white/10 hover:text-red-300">
+                  <button onClick={clearCart} title="Clear cart" className={cn('rounded-lg p-1.5 hover:bg-white/10 hover:text-red-300', isProcessing ? 'opacity-50 cursor-not-allowed' : '')}>
                     <Trash2 className="size-4" />
                   </button>
                 )}
@@ -751,14 +761,13 @@ export default function PosIndex({
         <button
           type="button"
           onClick={() => setShowCartSheet(true)}
-          className="flex h-14 w-full items-center justify-between rounded-2xl bg-slate-900 px-4 text-white shadow-lg active:scale-[0.99]"
-        >
+          className="flex h-14 w-full items-center justify-between rounded-2xl bg-slate-900 px-4 text-white shadow-lg active:scale-[0.99]">
           <span className="flex items-center gap-2 text-sm font-semibold">
             <ShoppingCart className="size-5" />
             View cart
             <span className="rounded-full bg-white/20 px-2 py-0.5 text-xs font-bold tabular-nums">{itemCount}</span>
           </span>
-          <span className="text-xl font-black tabular-nums">{formatCurrency(total)}</span>
+          <span className="font-display text-[24px] leading-none font-black tracking-tight tabular-nums">{formatCurrency(total)}</span>
         </button>
       </div>
 

@@ -68,18 +68,6 @@ export function DataTable<T>({
     onSort(key, order);
   };
 
-  const sortedData = React.useMemo(() => {
-    if (!sortConfig) return data;
-    return [...data].sort((a, b) => {
-      const aVal = columns.find(c => c.key === sortConfig.key)?.accessor(a);
-      const bVal = columns.find(c => c.key === sortConfig.key)?.accessor(b);
-      if (aVal === bVal) return 0;
-      return sortConfig.order === 'asc'
-        ? String(aVal).localeCompare(String(bVal))
-        : String(bVal).localeCompare(String(aVal));
-    });
-  }, [data, sortConfig, columns]);
-
   const handleSelectAll = () => {
     if (!selection) return;
     if (selection.selectedKeys.size === data.length) {
@@ -91,7 +79,7 @@ export function DataTable<T>({
 
   if (isLoading) {
     return (
-      <div className="rounded-2xl border border-slate-200 bg-white">
+      <div className="rounded-2xl border border-neutral-200 bg-white">
         <div className="overflow-auto">
           <Table>
             <TableHeader>
@@ -119,7 +107,7 @@ export function DataTable<T>({
                     {column.sortable ? (
                       <button
                         onClick={() => handleSort(column.key)}
-                        className="flex items-center gap-1 hover:text-slate-900"
+                        className="flex items-center gap-1 hover:text-neutral-900"
                       >
                         {column.header}
                         {sortConfig?.key === column.key && (
@@ -144,7 +132,7 @@ export function DataTable<T>({
                   onClick={() => onRowClick?.(item)}
                   className={cn(
                     onRowClick && 'cursor-pointer',
-                    selection?.selectedKeys.has(keyAccessor(item)) && 'bg-blue-50'
+                    selection?.selectedKeys.has(keyAccessor(item)) && 'bg-brand-50'
                   )}
                   data-selected={selection?.selectedKeys.has(keyAccessor(item))}
                 >
@@ -188,15 +176,15 @@ export function DataTable<T>({
 
   if (data.length === 0) {
     return (
-      <div className="rounded-2xl border border-slate-200 bg-white p-12">
+      <div className="rounded-2xl border border-neutral-200 bg-white p-12">
         {emptyState || (
           <div className="text-center py-8">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 mx-auto mb-4 text-slate-400">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-neutral-100 mx-auto mb-4 text-neutral-400">
               <svg className="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             </div>
-            <p className="text-slate-500">No data available</p>
+            <p className="text-neutral-500">No data available</p>
           </div>
         )}
       </div>
@@ -204,7 +192,7 @@ export function DataTable<T>({
   }
 
   return (
-    <div className={cn('rounded-2xl border border-slate-200 bg-white', className)}>
+    <div className={cn('rounded-2xl border border-neutral-200 bg-white', className)}>
       <div className="overflow-auto">
         <Table>
           <TableHeader>
@@ -232,7 +220,7 @@ export function DataTable<T>({
                   {column.sortable ? (
                     <button
                       onClick={() => handleSort(column.key)}
-                      className="flex items-center gap-1 hover:text-slate-900"
+                      className="flex items-center gap-1 hover:text-neutral-900"
                     >
                       {column.header}
                       {sortConfig?.key === column.key && (
@@ -251,13 +239,13 @@ export function DataTable<T>({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {sortedData.map((item) => (
+            {data.map((item) => (
               <TableRow
                 key={keyAccessor(item)}
                 onClick={() => onRowClick?.(item)}
                 className={cn(
                   onRowClick && 'cursor-pointer',
-                  selection?.selectedKeys.has(keyAccessor(item)) && 'bg-blue-50'
+                  selection?.selectedKeys.has(keyAccessor(item)) && 'bg-brand-50'
                 )}
                 data-selected={selection?.selectedKeys.has(keyAccessor(item))}
               >

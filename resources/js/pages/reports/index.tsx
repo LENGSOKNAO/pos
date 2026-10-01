@@ -29,7 +29,7 @@ interface DayRow {
     orders: number;
 }
 
-const inputCls = 'h-10 rounded-xl border border-slate-200 bg-white px-2.5 text-sm outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/15';
+const inputCls = 'h-10 rounded-xl border border-slate-200 bg-white px-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100/15';
 const labelCls = 'text-[11px] font-bold tracking-wider text-slate-500 uppercase';
 
 export default function ReportsIndex({
@@ -77,7 +77,7 @@ export default function ReportsIndex({
                 description="Revenue, profit and top products for the selected range."
             />
 
-            <div className="mb-4 flex flex-wrap items-end gap-3 rounded-2xl border border-slate-200/90 bg-white p-4">
+            <div className="mb-4 flex flex-wrap items-end gap-3 rounded-xl border border-slate-200 bg-white p-4">
                 <label className={labelCls}>
                     From
                     <input type="date" value={from} onChange={(e) => setFrom(e.target.value)} className={`mt-1.5 ml-0 block ${inputCls}`} />
@@ -103,7 +103,7 @@ export default function ReportsIndex({
             <Deferred data={['summary', 'topProducts', 'salesByDay']} fallback={<><CardsSkeleton count={6} /><div className="mt-4"><RowsSkeleton count={5} /></div></>}>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
                 {kpis.map((c) => (
-                    <div key={c.label} className="rounded-2xl border border-slate-200/90 bg-white px-4 py-3.5">
+                    <div key={c.label} className="rounded-xl border border-slate-200 bg-white px-4 py-3.5">
                         <div className="flex items-center gap-1.5 text-[11px] font-bold tracking-wider text-slate-500 uppercase">
                             <c.icon className="size-3.5 text-slate-400" /> {c.label}
                         </div>
@@ -114,7 +114,7 @@ export default function ReportsIndex({
             </div>
 
             <div className="mt-4 grid gap-4 lg:grid-cols-2">
-                <Card className="rounded-2xl border-slate-200/90 bg-white">
+                <Card className="rounded-xl border border-slate-200 bg-white transition-all hover:shadow-sm hover:bg-slate-50">
                     <CardHeader className="flex flex-row items-center justify-between">
                         <div>
                             <CardTitle className="text-[15px] font-bold text-slate-900">Sales by day</CardTitle>
@@ -128,14 +128,14 @@ export default function ReportsIndex({
                             <div key={d.day} className="flex items-center gap-3 text-xs">
                                 <span className="w-24 shrink-0 font-semibold text-slate-500">{d.day}</span>
                                 <div className="h-6 flex-1 overflow-hidden rounded-lg bg-slate-100 ring-1 ring-slate-200/50 ring-inset">
-                                    <div className="h-6 rounded-lg bg-blue-600" style={{ width: `${Math.max(2, (Number(d.total) / maxDay) * 100)}%` }} />
+                                    <div className="h-6 rounded-lg bg-emerald-600" style={{ width: `${Math.max(2, (Number(d.total) / maxDay) * 100)}%` }} />
                                 </div>
                                 <span className="w-24 shrink-0 text-right font-extrabold text-slate-900 tabular-nums">${Number(d.total).toLocaleString()} <span className="font-medium text-slate-400">· {d.orders}</span></span>
                             </div>
                         ))}
                     </CardContent>
                 </Card>
-                <Card className="rounded-2xl border-slate-200/90 bg-white">
+                <Card className="rounded-xl border border-slate-200 bg-white transition-all hover:shadow-sm hover:bg-slate-50">
                     <CardHeader>
                         <CardTitle className="text-[15px] font-bold text-slate-900">Top products</CardTitle>
                         <p className="mt-0.5 text-xs text-slate-500">Best sellers in range</p>
