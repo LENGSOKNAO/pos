@@ -93,8 +93,8 @@ export default function PosIndex({
 }) {
   const safeProducts = Array.isArray(products?.data) ? products.data : Array.isArray(products) ? products : [];
   const safeCategories = Array.isArray(categories) ? categories : [];
-  const safeCustomers = Array.isArray(customers?.data) ? customers.data : Array.isArray(customers) ? customers : [];
-  const safePaymentMethods = Array.isArray(paymentMethods) ? paymentMethods : [];
+  const safeCustomers = customers?.data ? customers.data : customers ? [customers] : [];
+  const safePaymentMethods = Array.isArray(paymentMethods) ? paymentMethods : (paymentMethods ? [paymentMethods] : []);
   const { hasPermission, user } = useAuth();
   const [cart, setCart] = useState<CartItem[]>([]);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
@@ -129,10 +129,12 @@ export default function PosIndex({
   };
 
   const addToCart = (product: any) => {
-    if (product.track_serial && !product.serial_numbers) {
+    // Check if product requires serial number tracking
+    if (product.track_serial && !product.serial_numbers?.length) {
       addToast('warning', 'Serial Required', 'This product requires serial number tracking');
       return;
     }
+    // Check if product requires batch tracking
     if (product.track_batch && !product.batches?.length) {
       addToast('warning', 'Batch Required', 'This product requires batch tracking');
       return;
@@ -141,8 +143,10 @@ export default function PosIndex({
     setCart(prev => {
       const existing = prev.find(item => item.product_id === product.id);
       if (existing) {
-        if (existing.quantity >= (stockOf(product) || 999999)) {
-          addToast('error', 'Insufficient Stock', `Only ${stockOf(product)} in stock`);
+        // Check stock before allowing increment
+        const currentStock = stockOf(product) || 999999;
+        if (existing.quantity >= currentStock) {
+          addToast('error', 'Insufficient Stock', `Only ${currentStock} in stock`);
           return prev;
         }
         return prev.map(item =>
@@ -151,7 +155,8 @@ export default function PosIndex({
             : item
         );
       }
-      return [...prev, {
+      // For new items, collect variant/batch/serial info if needed
+      const newItem: CartItem = {
         id: Math.random().toString(36).substr(2, 9),
         product_id: product.id,
         name: product.name,
@@ -162,7 +167,11 @@ export default function PosIndex({
         quantity: 1,
         discount: 0,
         tax: 0,
-      }];
+        variant_id: product.variants?.length ? product.variants[0].id : undefined,
+        batch_id: product.batches?.[0]?.id,
+        serial_numbers: product.track_serial ? [] : undefined,
+      };
+      return [...prev, newItem];
     });
   };
 
@@ -170,6 +179,13 @@ export default function PosIndex({
     setCart(prev => prev.map(item => {
       if (item.id !== id) return item;
       const newQty = Math.max(1, item.quantity + delta);
+      // Check stock availability
+      const product = safeProducts.find((p: any) => p.id === item.product_id);
+      const available = getAvailableStock(product || item);
+      if (newQty > available) {
+        addToast('error', 'Insufficient Stock', `Only ${available} available`);
+        return item;
+      }
       return { ...item, quantity: newQty };
     }));
   };
@@ -193,6 +209,16 @@ export default function PosIndex({
     if (!paymentMethod) {
       addToast('error', 'Payment Method Required', 'Please select a payment method');
       return;
+    }
+
+    // Validate each item has sufficient stock before checkout
+    for (const item of cart) {
+      const product = safeProducts.find((p: any) => p.id === item.product_id);
+      const available = getAvailableStock(product || item);
+      if (item.quantity > available) {
+        addToast('error', 'Insufficient Stock', `Only ${available} available for ${item.name}`);
+        return;
+      }
     }
 
     setIsProcessing(true);
@@ -339,6 +365,13 @@ export default function PosIndex({
     return 0;
   };
 
+  const getAvailableStock = (product: any): number => {
+    const totalStock = stockOf(product);
+    const reserved = product.stock_reserved || 0;
+    const damaged = product.damaged_quantity || 0;
+    return Math.max(0, totalStock - Number(reserved) - Number(damaged));
+  };
+
   const ticketBody = (
     <>
       {/* Customer row */}
@@ -479,7 +512,7 @@ export default function PosIndex({
             );
           })}
         </div>
-        {safePaymentMethods.length > 4 && (
+        {safePaymentMethods.length > 4 && safePaymentMethods.length > 0 && (
           <Select
             value={paymentMethod?.id || ''}
             onChange={(e) => {
@@ -496,6 +529,7 @@ export default function PosIndex({
             ))}
           </Select>
         )}
+
 
         {/* Product grid */}
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 2xl:grid-cols-4">
